@@ -11,7 +11,7 @@
             depressed
             color="primary"
             >
-            Primary
+            Primar
             </v-btn>
         </v-row>
     </div>
