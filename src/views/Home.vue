@@ -1,6 +1,6 @@
 <template>
-    <v-container class="secundary" cols="12"  fluid fill-height>
-        Hola
+    <v-container class="d-flex justify-center" fill-height >
+        <v-img alt="Vue logo" src="../assets/pycca-cuadrado.png" max-width="200" width="100%"></v-img>
     </v-container>
 </template>
 
@@ -12,6 +12,5 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
 </style>

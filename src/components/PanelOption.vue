@@ -1,10 +1,10 @@
 <template>
   <v-expansion-panels class="mb-6">
       <v-expansion-panel>
-        <v-expansion-panel-header expand-icon="mdi-menu-down">
+        <v-expansion-panel-header expand-icon="mdi-menu-down" color="secondary">
                <div>
-                    <v-icon color="error">{{icon}}</v-icon>
-                    <span>{{nameModule}}</span>
+                    <v-icon color="primary">{{icon}}</v-icon>
+                    <span class="baseColor--text ml-2">{{nameModule}}</span>
               </div>
         </v-expansion-panel-header>
         <div
@@ -33,5 +33,7 @@ export default {
 </script>
 
 <style>
-
+.colores{
+    background-color: #00529f80
+} 
 </style>

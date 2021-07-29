@@ -16,6 +16,7 @@
                 outlined
                 dark
                 filled
+                autocomplete="off"
                 dense
               ></v-text-field>
               <v-text-field
@@ -28,27 +29,30 @@
                 dense
                 dark
                 filled
+                autocomplete="off"
                 :type="showPass ? 'text' : 'password'"
               ></v-text-field>
               
           <v-col
-          class="d-flex m-0"
-          cols="10"
-          sm="10"
+          class="d-flex ma-0 pa-0"
+          cols="12"
+          xs="12"
 
         >
           <v-select
+            class=""
             :items="items"
-            label="Ambiente del aplicativo"
+            v-model="defaultSelected"
             solo
           >
             <template #selection="{ item }">
                 <v-chip color="secundary">{{item}}</v-chip>
             </template>
           </v-select>
+          
         </v-col>
               
-                <router-link to="/home" class="signin-btn">
+                <router-link to="/login" v-on:click.native="iniciarSesion" class="signin-btn">
                   <v-btn
                     elevation="11"
                     x-large
@@ -67,30 +71,33 @@
 </template>
 
 <script>
-    /* import { extend } from 'vee-validate';
-    import { required, email } from '@vee-validate/rules'; */
-
-   /*  setInteractionMode('eager')
-
-    extend('required', {
-    ...required,
-    message: '{_field_} can not be empty'
-    })
-
-    extend('email', {
-    ...email,
-    message: 'Email must be valid'
-    }) */
-
+import { login } from "../services/DataServices.js";
     export default {
       name:"LoginPage",
 
       data: () => ({
           user: '',
-          password: null,
+          password: '',
           showPass: false,
+          defaultSelected: 'Prueba',
           items: ['Producción', 'Prueba']
       }),
+      methods:{
+         async iniciarSesion(){
+          var payload = {
+            user: this.user,
+            password: this.password
+          }
+          login(payload)
+          .then(() =>{
+              this.$router.push('/home');
+            }
+          )
+          .catch( error =>{
+            console.error(error);
+          });
+        }
+      }
     }
 </script>
 

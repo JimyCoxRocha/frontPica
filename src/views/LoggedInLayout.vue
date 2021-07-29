@@ -1,9 +1,12 @@
 <template>
   <div>
         <AppBar :handleNavBar="handleMenu"/>
-        <NavBar :sidebarMenu="sidebarMenu" :handleNavBar="handleMenu"/>
-        <v-main>
-            <router-view></router-view>  
+        <NavBar :sidebarMenu="sidebarMenu" :handleNavBar="handleMenu" :menuData="menuData"/>
+        
+        <v-main class="stylesHome">
+            <v-container fill-height>
+                <router-view></router-view>
+            </v-container>
         </v-main>
   </div>
 </template>
@@ -11,12 +14,17 @@
 <script>
     import AppBar from '../components/AppBar.vue';
     import NavBar from '../components/NavBar.vue';
+    import { findLocalStorage } from '../helpers/handleLocalStorage.js';
 
     export default {
         name:"Home",
+        created(){
+            this.menuData = JSON.parse(findLocalStorage( 'menu' ));
+        },
         data(){
             return{
                 sidebarMenu: true,
+                menuData: [{}]
             }
         },
         components: {
@@ -32,5 +40,8 @@
 </script>
 
 <style>
-
+.stylesHome{
+    min-height: 100vh;
+    background-color: #ECF0F5;
+}
 </style>

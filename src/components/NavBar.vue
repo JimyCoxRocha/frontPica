@@ -4,7 +4,7 @@
         app
         floating
         :permanent="sidebarMenu"
-        color="primary"
+        color="secondary"
         >
         <v-list dense color="baseColor" dark>
             <v-list-item>
@@ -41,10 +41,10 @@
                     <v-list-item-title class="baseColor--text">{{ item.title }}</v-list-item-title>
                 </v-list-item-content>
             </v-list-item> -->
-            
             <v-list-item
-                v-for="(menuItem,i) in menu"
-                :key="i" class="pa-0">
+                
+                v-for="(menuItem,i) in menuData"
+                :key="i" class="pa-0 secondary">
                 <PanelOption 
                     :nameModule="menuItem.module" 
                     :icon="menuItem.icon" 
@@ -66,46 +66,6 @@ export default {
                 { title: 'My Account', icon: 'mdi-account' },
                 { title: 'Users', icon: 'mdi-account-group-outline' },
             ],
-            menu:[
-                {
-                    module:"Consultas",
-                    icon: "mdi-chart-bar",
-                    items:[
-                        {
-                            option:"Reporte Logs Auditoria",
-                            icon: ""
-                        },
-                        {
-                            option:"Reporte Logs Auditoria",
-                            icon: ""
-                        }
-                    ]
-                },
-                {
-                    module:"Dashboard",
-                    icon: "mdi-chart-pie",
-                    items:[
-                        {
-                            option:"Agrupado por Aplicaciones",
-                            icon: ""
-                        },
-                        {
-                            option:"Agrupado por Aplicaciones",
-                            icon: ""
-                        },
-                        ]
-                },
-                {
-                    module:"Proceso",
-                    icon: "mdi-cog",
-                    items:[
-                        {
-                            option:"Eliminar Log",
-                            icon: ""
-                        }
-                    ]
-                }
-		    ]// eslint-disable-line no-mixed-spaces-and-tabs
         }
     },
     components:{
@@ -116,6 +76,10 @@ export default {
         sidebarMenu: Boolean,
         handleNavBar:{
             type: Function
+        },
+        menuData: {
+            type: Array,
+            required: false // User can accept a userData object on params, or not. It's totally optional.
         }
     },
     methods:{
