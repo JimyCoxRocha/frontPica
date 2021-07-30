@@ -42,7 +42,7 @@
                         <v-text-field
                           v-bind="attrs"
                           v-on="on"
-                          v-model="date"
+                          v-model="valorFechaDesde"
                           rounded
                           readonly
                           outlined
@@ -51,7 +51,7 @@
                         ></v-text-field>
                       </template>
                       <v-date-picker
-                        v-model="date"
+                        v-model="valorFechaDesde"
                         @input="fechaDesde = false"
                       ></v-date-picker>
                     </v-menu>
@@ -88,7 +88,7 @@
                         <v-text-field
                           v-bind="attrs"
                           v-on="on"
-                          v-model="date"
+                          v-model="valorFechaHasta"
                           rounded
                           readonly
                           outlined
@@ -97,7 +97,7 @@
                         ></v-text-field>
                       </template>
                       <v-date-picker
-                        v-model="date"
+                        v-model="valorFechaHasta"
                         @input="fechaHasta = false"
                       ></v-date-picker>
                     </v-menu>
@@ -123,7 +123,10 @@
                   md="8"
                   >
                     <v-select
-                      :items="items"
+                      :items="modulos" 
+                      v-model="inputSelected.keyModulo"
+                      item-value="key" 
+                      item-text="name"
                       outlined
                       rounded
                       dense
@@ -154,7 +157,10 @@
                     sm="6"
                   >
                     <v-select
-                      :items="items"
+                      :items="servicios" 
+                      v-model="inputSelected.keyService"
+                      item-value="key" 
+                      item-text="name"
                       outlined
                       rounded
                       dense
@@ -166,7 +172,7 @@
               </v-col>
 
               <v-col>
-                  <Boton :btnData="btnBuscar"/>
+                  <Boton :btnData="btnBuscar" :click="clickBuscar"/>
               </v-col>
             </v-row>
           </div>
@@ -191,7 +197,7 @@
               </v-row>
             </v-col>
           </div>
-          <TableReporte/>
+          <TableReporte :dataSolicitada="dataSolicitada"/>
         </div>
       </div>
     </v-container>
@@ -200,6 +206,8 @@
 <script>
   import Boton from '../../components/Boton.vue';
   import TableReporte from '../../components/TableReporte.vue';
+  import { findAllLogDebug } from '../../services/DataServices';
+  import { consultaReporte } from '../../types/objetoConsultaReporte.js';
 
   const btnBuscar = {
     icon: "mdi-magnify",
@@ -221,18 +229,53 @@
   export default {
       name: "LogDebug",
       data: () => ({
-        date: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
         fechaDesde: false,
+        valorFechaDesde: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
         fechaHasta: false,
-        items: ['Foo', 'Bar', 'Fizz', 'Buzz'],
-
+        valorFechaHasta: (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10),
+        inputSelected: {
+            keyModulo: "pica",
+            keyService: "all",
+        },
+        modulos: [
+          {
+            key: "pica",
+            name: "Proyectos"
+          }
+        ],
+        servicios: [
+          {
+            key: "all",
+            name: "Todos"
+          },
+          {
+            key: "catalogue",
+            name: "Catálogo"
+          }
+        ],
         btnBuscar,
         exportarPDF,
-        exportarExcel
+        exportarExcel,
+        dataSolicitada: [{}]
       }),
       components:{
         Boton,
         TableReporte
+      },
+      methods:{
+          async clickBuscar(){
+            consultaReporte.fecha_desde = this.valorFechaDesde;
+            consultaReporte.fecha_hasta = this.valorFechaHasta;
+            console.log(consultaReporte);
+
+            this.dataSolicitada = await findAllLogDebug(consultaReporte)
+            .then((data)=>{
+              return data;
+            })
+            .catch(err => {
+              console.log(err);
+            })
+          }
       }
 
   }

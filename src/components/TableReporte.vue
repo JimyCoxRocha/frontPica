@@ -6,32 +6,33 @@
                 <tr>
                     
                     <v-col tag="th" cols="1" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">Módulo</p>
+                        <p class="ma-0 pa-0 baseColor--text">pathController</p>
                     </v-col>
                     <v-col tag="th" cols="2" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">Método</p>
-                    </v-col>
-                    <v-col tag="th" cols="3" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">Input</p>
-                    </v-col>
-                    <v-col tag="th" cols="5" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">Output</p>
+                        <p class="ma-0 pa-0 baseColor--text">pathEndpoint</p>
                     </v-col>
                     <v-col tag="th" cols="1" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">Fecha</p>
+                        <p class="ma-0 pa-0 baseColor--text">dateOutput</p>
                     </v-col>
+                    <v-col tag="th" cols="3" class="text-center">
+                        <p class="ma-0 pa-0 baseColor--text">dataInput</p>
+                    </v-col>
+                    <v-col tag="th" cols="5" class="text-center">
+                        <p class="ma-0 pa-0 baseColor--text">dataOutput</p>
+                    </v-col>
+                    
                 </tr>
             </thead>
             <tbody>
                 <tr
-                v-for="item in desserts"
-                :key="item.name"
+                v-for="data in dataSolicitada"
+                :key="data.dateInput"
                 >
-                    <td>{{ item.name1 }}</td>
-                    <td>{{ item.name2 }}</td>
-                    <td>{{ item.name3 }}</td>
-                    <td>{{ item.name4 }}</td>
-                    <td>{{ item.calories }}</td>
+                    <td>{{ data.pathController }}</td>
+                    <td>{{ data.pathEndpoint }}</td>
+                    <td>{{ data.dateOutput }}</td>
+                    <td>{{ data.dataInput }}</td>
+                    <td>{{ data.dataOutput }}</td>
                 </tr>
             </tbody>
         </template>
@@ -68,6 +69,9 @@ export default {
         ],
       }
     },
+    props: {
+        dataSolicitada: Array
+    }
   }
 </script>
 

@@ -24,8 +24,6 @@ export default {
     },
     mounted(){
         this.opcionUrl = obtenerRutasModulo(this.opcionName);
-        console.log( "Valores: "+ obtenerRutasModulo(this.opcionName));
-        console.log(this.opcionName);
     }
 }
 </script>

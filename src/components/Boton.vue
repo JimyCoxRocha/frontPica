@@ -3,6 +3,7 @@
       rounded
       :color="btnData.color"
       class="white--text"
+      @click.stop="click"
     >
       <v-icon left>
         {{btnData.icon}}
@@ -15,7 +16,10 @@
 export default {
     name: "Boton",
     props:{
-        btnData: Object
+        btnData: Object,
+        click: {
+            type: Function
+        }
     }
 }
 </script>

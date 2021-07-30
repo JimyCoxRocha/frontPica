@@ -16,7 +16,6 @@ export const obtenerRutasModulo = function(modulo = ''){
             return false;
           }
     });
-    console.log( modulo );
     return rutaObtenida[0]?.route || "/home";
     
     
