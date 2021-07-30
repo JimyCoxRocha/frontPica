@@ -12,8 +12,10 @@ export default new Vuetify({
             selectedColor: '#00529f',
             menuItemColor: '#2A6CAD',
             red: '#FF1619',
-            baseColor: '#fff'
+            baseColor: '#fff',
+            excelColor: "#00A65A"
           },
         },
       },
+      
 });

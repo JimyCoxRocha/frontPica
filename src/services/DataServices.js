@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
 const baseUrl = 'https://my-json-server.typicode.com/JimyCoxRocha/apiPIKA';
+const baseUrlDebug = 'https://my-json-server.typicode.com/JimyCoxRocha/dataTable/all'
 
 
 
@@ -22,6 +23,22 @@ export const login = async function(payload) {
         console.error(error);
       throw error;
     })
+
+}
+
+export const findAllLogDebug = async function() {
+  let datosRecibidos = [{}];
+  await axios.get(`${baseUrlDebug}`)
+  .then(resp => {
+    console.log(resp.data);
+    datosRecibidos = resp.data;
+    console.log(datosRecibidos);
+    return datosRecibidos;
+  })
+  .catch(error => {
+      console.error(error);
+    throw error;
+  })
 
 }
 
