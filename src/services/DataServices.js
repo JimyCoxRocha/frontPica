@@ -23,7 +23,6 @@ export const findAllLogDebug = async function() {
   await axios.get(`${baseUrlDebug}`) 
   .then(resp => {
     datosRecibidos = resp.data;
-    console.log(datosRecibidos);
     return datosRecibidos;
   })
   .catch(error => {

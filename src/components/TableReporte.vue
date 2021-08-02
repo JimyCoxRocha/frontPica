@@ -1,26 +1,29 @@
 <template>
     <v-simple-table
-    dense>
+    dense
+    >
         <template v-slot:default>
             <thead class="secondary">
                 <tr>
                     
                     <v-col tag="th" cols="1" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">pathController</p>
+                        <p class="ma-0 pa-0 baseColor--text">Path categoría</p>
                     </v-col>
                     <v-col tag="th" cols="2" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">pathEndpoint</p>
+                        <p class="ma-0 pa-0 baseColor--text">Path endpoint</p>
                     </v-col>
-                    <v-col tag="th" cols="1" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">dateOutput</p>
+                    <v-col tag="th" cols="2" class="text-center">
+                        <p class="ma-0 pa-0 baseColor--text">Endpoint</p>
+                    </v-col>
+                    <v-col tag="th" cols="1" class="text-center"> 
+                        <p class="ma-0 pa-0 baseColor--text">Fecha</p>
                     </v-col>
                     <v-col tag="th" cols="3" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">dataInput</p>
+                        <p class="ma-0 pa-0 baseColor--text">Input</p>
                     </v-col>
                     <v-col tag="th" cols="5" class="text-center">
-                        <p class="ma-0 pa-0 baseColor--text">dataOutput</p>
+                        <p class="ma-0 pa-0 baseColor--text">Output</p>
                     </v-col>
-                    
                 </tr>
             </thead>
             <tbody>
@@ -30,6 +33,7 @@
                 >
                     <td>{{ data.pathController }}</td>
                     <td>{{ data.pathEndpoint }}</td>
+                    <td>{{  }}</td>
                     <td>{{ data.dateOutput }}</td>
                     <td>{{ data.dataInput }}</td>
                     <td>{{ data.dataOutput }}</td>
@@ -44,29 +48,6 @@
 export default {
     data () {
       return {
-        desserts: [
-            {
-              name1: 'Frozen Yogurt',
-              name2: 'Frozen Yogurt',
-              name3: 'Frozen Yogurt',
-              name4: 'Frozen Yogurt',
-              calories: 159,
-            },
-            {
-              name1: 'Frozen Yogurt',
-              name2: 'Frozen Yogurt',
-              name3: 'Frozen Yogurt',
-              name4: 'Frozen Yogurt',
-              calories: 159,
-            },
-            {
-              name1: 'Frozen Yogurt',
-              name2: 'Frozen Yogurt',
-              name3: 'Frozen Yogurt',
-              name4: 'Frozen Yogurt',
-              calories: 159,
-            }
-        ],
       }
     },
     props: {

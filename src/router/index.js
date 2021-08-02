@@ -3,7 +3,9 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/LoginPage.vue'
 import LoggedInLayout from '../views/LoggedInLayout.vue'
-import LogDebug from '../views/reporte/LogDebug.vue'
+import LogAuditoria from '../views/reporte/LogAuditoria.vue'
+import LogError from '../views/reporte/LogError.vue'
+import AgruparAplicaciones from '../views/dashboard/AgruparAplicaciones.vue'
 
 Vue.use(VueRouter)
 
@@ -26,10 +28,22 @@ const routes = [
         component: Home
       },
       {
-        title: 'LogDebug',
-        path: '/logDebug',
-        name: 'LogDebug',
-        component: LogDebug
+        title: 'LogAuditoria',
+        path: '/LogAuditoria',
+        name: 'LogAuditoria',
+        component: LogAuditoria
+      },
+      {
+        title: 'LogError',
+        path: '/LogError',
+        name: 'LogError',
+        component: LogError
+      },
+      {
+        title: 'AgruparPorAplicaciones',
+        path: '/AgruparPorAplicaciones',
+        name: 'AgruparPorAplicaciones',
+        component: AgruparAplicaciones
       },
     ]
   }
