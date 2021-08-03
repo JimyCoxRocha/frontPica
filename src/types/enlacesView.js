@@ -3,7 +3,7 @@ export const enlacesView = [
     {
         view: "LogAuditoria.vue",
         nameEsperado: "Reporte Logs Auditoria",
-        route: "/LogAuditoria"
+        route: "/logAuditoria"
     },
     {
         view: "LogError.vue",
@@ -13,16 +13,17 @@ export const enlacesView = [
     {
         view: "AgruparAplicaciones.vue",
         nameEsperado: "Agrupado por Aplicaciones",
-        route: "/AgruparPorAplicaciones"
+        route: "/agruparPorAplicaciones"
     },
     {
         view: "EliminarLogs.vue",
         nameEsperado: "Eliminar Log",
-        route: "/EliminarLogs"
+        route: "/eliminarLog"
     },
     {
-        view: "ProcesoPostam.vue",
+        view: "Postam.vue",
         nameEsperado: "Proceso Postman",
-        route: "/procesoPostam"
+        route: "/postman"
     },
+    
 ]

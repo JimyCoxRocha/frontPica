@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
+import { obtenerClaveValorPostman } from '../helpers/obtenerClaveValorPostman.js';
 const baseUrl = 'https://my-json-server.typicode.com/JimyCoxRocha/apiPIKA';
 const baseUrlDebug = 'https://my-json-server.typicode.com/JimyCoxRocha/dataTable/all'
 
@@ -31,6 +32,51 @@ export const findAllLogDebug = async function() {
   })
   return datosRecibidos;
 
+}
+
+export const peticionGETPostman = async function(objPostman) {
+  let datosRecibidos = [{}];
+
+
+  await axios.get(objPostman.url, {
+    headers: obtenerClaveValorPostman(objPostman.elementosHeaders),
+    params: objPostman.dataJSONEnvio,
+  }) 
+  .then(resp => {
+    datosRecibidos = resp.data;
+    console.log("Dentro de la pticion");
+    return datosRecibidos;
+  })
+  .catch(error => {
+      console.error(error);
+    throw error;
+  })
+  return datosRecibidos;
+
+}
+
+export const peticionPostman = async function(objPostman){
+  switch (objPostman.peticion) {
+    case 'GET':
+      console.log("Ingreso GET");
+      return peticionGETPostman(objPostman);
+    case 'POST':
+      
+      break;
+    case 'PUT':
+      
+      break;
+    case 'DELETE':
+      
+      break;
+    case 'PATCH':
+      
+      break;
+  
+    default:
+      "Petición incorrecta";
+      break;
+  }
 }
 
 /*  export async function storiesWithItems(){

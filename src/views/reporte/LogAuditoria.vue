@@ -85,9 +85,9 @@
 </template>
 
 <script>
+  import moment from 'moment';
   import DatePicker from '../../components/DatePicker.vue';
   import Select from '../../components/Select.vue';
-  import moment from 'moment';
   import Boton from '../../components/Boton.vue';
   import TableReporte from '../../components/TableReporte.vue';
   import { findAllLogDebug } from '../../services/DataServices';

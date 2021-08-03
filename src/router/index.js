@@ -6,6 +6,8 @@ import LoggedInLayout from '../views/LoggedInLayout.vue'
 import LogAuditoria from '../views/reporte/LogAuditoria.vue'
 import LogError from '../views/reporte/LogError.vue'
 import AgruparAplicaciones from '../views/dashboard/AgruparAplicaciones.vue'
+import EliminarLog from '../views/procesos/EliminarLog.vue';
+import Postman from '../views/procesos/Postman.vue';
 
 Vue.use(VueRouter)
 
@@ -29,21 +31,33 @@ const routes = [
       },
       {
         title: 'LogAuditoria',
-        path: '/LogAuditoria',
+        path: '/logAuditoria',
         name: 'LogAuditoria',
         component: LogAuditoria
       },
       {
         title: 'LogError',
-        path: '/LogError',
+        path: '/logError',
         name: 'LogError',
         component: LogError
       },
       {
         title: 'AgruparPorAplicaciones',
-        path: '/AgruparPorAplicaciones',
+        path: '/agruparPorAplicaciones',
         name: 'AgruparPorAplicaciones',
         component: AgruparAplicaciones
+      },
+      {
+        title: 'EliminarLog',
+        path: '/eliminarLog',
+        name: 'EliminarLog',
+        component: EliminarLog
+      },
+      {
+        title: 'Postman',
+        path: '/postman',
+        name: 'Postman',
+        component: Postman
       },
     ]
   }

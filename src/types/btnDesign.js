@@ -14,3 +14,21 @@ export const exportarExcel = {
     texto: "Exportar Excel",
     color: "excelColor",
 }
+
+export const btnCerrar = {
+    icon: "mdi-close-box-multiple",
+    texto: "Cerrar",
+    color: "secondary",
+}
+
+export const btnDelete = {
+    icon: "mdi-alert-circle",
+    texto: "Eliminar",
+    color: "red",
+}
+
+export const btnEnviar = {
+    icon: "mdi-arrow-right",
+    texto: "Enviar",
+    color: "primary",
+}

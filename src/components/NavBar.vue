@@ -55,6 +55,11 @@ export default {
             required: false // User can accept a userData object on params, or not. It's totally optional.
         }
     },
+    computed: {
+      double() {
+        return this.value * 2;
+      }
+    },
     methods:{
     }
 
