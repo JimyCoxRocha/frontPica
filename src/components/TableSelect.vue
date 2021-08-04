@@ -1,10 +1,14 @@
 <template>
-    <v-data-table
-        :headers="headers"
-        :items="items"
-        :items-per-page="30"
-        class="elevation-1"
-    >
+  <v-data-table
+    v-model="selected"
+    :headers="headers"
+    :items="items"
+    :single-select="singleSelect"
+    item-key="dateOutput"
+    show-select
+    class="elevation-1"
+    :item-selected="obtenerSelecion(selected)"
+  >
     <template v-slot:[`item.dataInput`]="{ item }">
       {{ item }}
     </template>
@@ -15,11 +19,13 @@
 </template>
 
 <script>
-//https://vuetifyjs.com/en/components/data-iterators/
-export default {
+  export default {
+    name: "TableSelect",
     data () {
       return {
-          headers: [
+        singleSelect: false,
+        selected: [],
+        headers: [
           {
             text: 'Path categoría',
             align: 'start',
@@ -32,6 +38,7 @@ export default {
           { text: 'Input', value: 'dataInput' },
           { text: 'Output', value: 'dataOutput' },
         ],
+        
       }
     },
     props: {
@@ -39,20 +46,14 @@ export default {
             type: Array,
             require: true
         },
-    }
+        obtenerSelecion:{
+            type: Function,
+            require: true
+        }
+    },
   }
 </script>
 
 <style>
-table th + th { border-left:2px solid #dddddd; }
-table td + td { border-left:2px solid #dddddd; }
-tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, .05);
-}
-tbody tr:nth-of-type(odd):hover {
-    background-color: rgba(0, 0, 0, .05)!important;
-}
-tbody tr:nth-of-type(even):hover {
-    background-color: rgba(255, 255, 255, 0.05)!important;
-}
+
 </style>

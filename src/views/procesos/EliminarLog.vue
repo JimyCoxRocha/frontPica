@@ -34,9 +34,60 @@
             </div>
             <v-col
                 class="mt-0 pa-0 mb-1"
+                v-show="showButonDelete"
                 md="2"
                 >
-                <Boton :btnData="btnDelete" :click="clickEliminar" :isDisabled="btnDisabled"/>
+
+                <v-dialog
+                    v-model="dialog"
+                    width="500"
+                    
+                    >
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                        color="red lighten-2"
+                        dark
+                        v-bind="attrs"
+                        v-on="on"
+                        
+                        >
+                            Eliminar
+                        </v-btn>
+                    </template>
+
+                    <v-card>
+                        <v-card-title class="text-h5 grey lighten-2">
+                            Confirmar Eliminación
+                        </v-card-title>
+
+                        <v-card-text>
+                            ¿Está seguro que desea eliminar los elementos seleccionados?
+                        </v-card-text>
+
+                        <v-divider></v-divider>
+
+                        <v-card-actions>
+                            <v-btn
+                                color="primary"
+                                text
+                                @click="clickEliminar"
+                            >
+                                Eliminar
+                            </v-btn>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                color="primary"
+                                text
+                                @click="dialog = false"
+                            >
+                                cancelar
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+
+
+                
             </v-col>
             <v-progress-linear
                 indeterminate
@@ -45,7 +96,8 @@
             >
             </v-progress-linear>
                 <p v-show="loading">Cargando los datos...</p>
-            <TableReporte :dataSolicitada="dataSolicitada"/>
+
+            <TableSelect :items="dataSolicitada" :obtenerSelecion="obtenerSelecion"/>
             </div>
         </div>
     </v-container>
@@ -55,7 +107,7 @@
 import moment from 'moment';
 import DatePicker from '../../components/DatePicker.vue';
 import Boton from '../../components/Boton.vue';
-import TableReporte from '../../components/TableReporte.vue';
+import TableSelect from "../../components/TableSelect.vue";
 import { btnBuscar, btnDelete } from "../../types/btnDesign.js";
 import { findAllLogDebug } from '../../services/DataServices';
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
@@ -67,16 +119,19 @@ export default {
         fechaActual: moment(Date.now()).format('YYYY-MM-DD'),
         valorFechaDesde: moment(Date.now()).subtract(1, 'day').format('YYYY-MM-DD'),
         valorFechaHasta: moment(Date.now()).format('YYYY-MM-DD'),
-        dataSolicitada: [{}],
+        dataSolicitada: [],
+        showButonDelete: false,
         btnBuscar,
         btnDelete,
         loading: false,
         btnDisabled: true,
+        dialog: false,
+        selected: []
     }),
     components:{
         DatePicker,
         Boton,
-        TableReporte
+        TableSelect
     },
     methods:{
         async clickBuscar(){
@@ -102,7 +157,16 @@ export default {
             this.valorFechaHasta = fecha;
         },
         async clickEliminar(){
+            this.dialog = false;
             console.log("ELIMINADO");
+        },
+        obtenerSelecion(elementos){
+            this.selected = elementos;
+            if(this.selected.length > 0){
+                this.showButonDelete = true;
+            }else{
+                this.showButonDelete = false;
+            }
         }
     }
 }

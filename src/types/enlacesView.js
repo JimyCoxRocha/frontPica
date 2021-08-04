@@ -25,5 +25,10 @@ export const enlacesView = [
         nameEsperado: "Proceso Postman",
         route: "/postman"
     },
+    {
+        view: "RegisterUser.vue",
+        nameEsperado: "Registrar un Usuario",
+        route: "/registrarUser"
+    },
     
 ]

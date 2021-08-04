@@ -95,16 +95,11 @@
                             <TextAreaAuto 
                                 :obtenerTexto="obtenerTexto"
                                 v-show="(elementActive === 'BODY') ?  true : false"
-                            />
-                            <!-- <DataTableEdit 
-                                :initialize="initializeParams"
-                                :agregar="agregarParams"
-                                :editar="editarParams"
-                                :eliminar="eliminarParams" /> -->
-                                
+                            />  
                         </v-card>
+                        <p :v-show="showErrorValidation" class="error white--text">{{errorValidation}}</p>
                     </v-col>
-
+                
                     <v-col
                         cols = "12"
                         md = "12"
@@ -162,7 +157,9 @@
             respServidor: "",
             status: "",
             time: "",
-            size: ""
+            size: "",
+            errorValidation: "",
+            showErrorValidation: false
         }),
         components: {
             Boton,
@@ -178,56 +175,55 @@
                 let objetoPeticionPostman = generarObjPostman;
                 objetoPeticionPostman.elementosHeaders = this.elementosHeaders;
                 objetoPeticionPostman.elementosParams = this.elementosParams;
-                objetoPeticionPostman.dataJSONEnvio = JSON.parse(this.dataJSONEnvio);
                 objetoPeticionPostman.peticion = this.peticionSelected;
                 objetoPeticionPostman.url = this.enlacePeticion;
+                try{
+                    //Covertimos a JSON el dato ingresado
+                    (this.dataJSONEnvio != "") 
+                        && (objetoPeticionPostman.dataJSONEnvio = JSON.parse(this.dataJSONEnvio));
+                        
+                    this.showErrorValidation = false;
+                    this.errorValidation = "";
 
-
-                this.respServidor = await peticionPostman(objetoPeticionPostman)
-                .then((data) =>{
-                    return JSON.stringify(data, null, 4);
-                })
-                .catch( error =>{
-                    console.error(error);
-                });
-
-                console.log(objetoPeticionPostman);
+                    this.respServidor = await peticionPostman(objetoPeticionPostman)
+                    .then((data) =>{
+                        console.log(data);
+                        this.status = data.status;
+                        this.time = data.time;
+                        this.size = data.size;
+                        return JSON.stringify(data.data, null, 4);
+                    })
+                    .catch( error =>{
+                        return JSON.stringify(error, null, 4);
+                    });
+                }catch(err){
+                    this.errorValidation = "Por favor, recuerde ingresar en formato JSON el valor";
+                    this.showErrorValidation = true;
+                }
             },
             initializeParams(){
                 return this.elementosParams;
             },
             editarParams(editedIndex,editedItem){
                 Object.assign(this.elementosParams[editedIndex], editedItem);
-                console.log("Se editó correctamente: ");
-                console.log(this.elementosParams);
             },
             eliminarParams(indexDelete){
                 this.elementosParams.splice(indexDelete, 1);
-                console.log("eliminó: ");
-                console.log(this.elementosParams);
             },
             agregarParams(ItemAdd){
                 this.elementosParams.push(ItemAdd);
-                console.log("Se guardó correctamente: ");
-                console.log(this.elementosParams);
             },
             initializeHeaders(){
                 return this.elementosHeaders;
             },
             editarHeaders(editedIndex,editedItem){
                 Object.assign(this.elementosHeaders[editedIndex], editedItem);
-                console.log("Se editó HEADER correctamente: ");
-                console.log(this.elementosHeaders);
             },
             eliminarHeaders(indexDelete){
                 this.elementosHeaders.splice(indexDelete, 1);
-                console.log("eliminó header: ");
-                console.log(this.elementosHeaders);
             },
             agregarHeaders(ItemAdd){
                 this.elementosHeaders.push(ItemAdd);
-                console.log("Se guardó correctamente HEader: ");
-                console.log(this.elementosHeaders);
             }
         }
     }

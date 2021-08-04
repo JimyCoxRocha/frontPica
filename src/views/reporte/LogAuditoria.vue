@@ -78,7 +78,7 @@
           >
           </v-progress-linear>
             <p v-show="loading">Cargando los datos...</p>
-          <TableReporte :dataSolicitada="dataSolicitada"/>
+          <TableReporte :items="dataSolicitada"/>
         </div>
       </div>
     </v-container>
@@ -142,7 +142,7 @@
         btnDisabled: true,
         exportarPDF,
         exportarExcel,
-        dataSolicitada: [{}],
+        dataSolicitada: [],
         loading: false
       }),
       components:{

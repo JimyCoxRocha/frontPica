@@ -32,3 +32,9 @@ export const btnEnviar = {
     texto: "Enviar",
     color: "primary",
 }
+
+export const btnGuardar = {
+    icon: "mdi-content-save-outline",
+    texto: "Guardar",
+    color: "primary",
+}

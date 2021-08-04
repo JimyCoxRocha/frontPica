@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
 import { obtenerClaveValorPostman } from '../helpers/obtenerClaveValorPostman.js';
+import { generarResponsePostman } from '../helpers/generarResponsePostman.js';
 const baseUrl = 'https://my-json-server.typicode.com/JimyCoxRocha/apiPIKA';
 const baseUrlDebug = 'https://my-json-server.typicode.com/JimyCoxRocha/dataTable/all'
 
@@ -34,49 +35,34 @@ export const findAllLogDebug = async function() {
 
 }
 
-export const peticionGETPostman = async function(objPostman) {
-  let datosRecibidos = [{}];
-
-
-  await axios.get(objPostman.url, {
+export const peticionPostman = async function(objPostman){
+  const timeBeforeRequest = performance.now();
+  let tiempo = 0;
+  let objetoResp = null;
+  
+  objetoResp = await axios({
+    method: objPostman.peticion,
+    url: objPostman.url,
     headers: obtenerClaveValorPostman(objPostman.elementosHeaders),
-    params: objPostman.dataJSONEnvio,
+    data: {...objPostman.dataJSONEnvio, ...obtenerClaveValorPostman(objPostman.elementosParams)},
   }) 
+
+
   .then(resp => {
-    datosRecibidos = resp.data;
-    console.log("Dentro de la pticion");
-    return datosRecibidos;
+    console.log(resp);
+    let timeAfterRequest = performance.now();
+    tiempo = (timeAfterRequest - timeBeforeRequest);
+    return generarResponsePostman(resp.data, resp.status, tiempo, JSON.stringify(resp).length);
   })
   .catch(error => {
-      console.error(error);
-    throw error;
+      if (error.response) {
+        let timeAfterRequest = performance.now();
+        tiempo = (timeAfterRequest - timeBeforeRequest);
+        console.log(error.response);
+        return generarResponsePostman(error.response.data, error.response.status, tiempo, JSON.stringify(error.response).length);
+      }
   })
-  return datosRecibidos;
-
-}
-
-export const peticionPostman = async function(objPostman){
-  switch (objPostman.peticion) {
-    case 'GET':
-      console.log("Ingreso GET");
-      return peticionGETPostman(objPostman);
-    case 'POST':
-      
-      break;
-    case 'PUT':
-      
-      break;
-    case 'DELETE':
-      
-      break;
-    case 'PATCH':
-      
-      break;
-  
-    default:
-      "Petición incorrecta";
-      break;
-  }
+  return objetoResp;
 }
 
 /*  export async function storiesWithItems(){

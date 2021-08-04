@@ -5,10 +5,6 @@ export const obtenerClaveValorPostman = (arreglo) =>{
         objetoClaveValor[element.key] = element.value;
         listaClaveValor = {...listaClaveValor, ...objetoClaveValor};
     });
-    console.log("Lista clave valor");
-    console.log(listaClaveValor);
-    console.log("objeto clave valor");
-    console.log(objetoClaveValor);
 
     return listaClaveValor;
 }

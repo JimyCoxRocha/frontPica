@@ -8,6 +8,7 @@ import LogError from '../views/reporte/LogError.vue'
 import AgruparAplicaciones from '../views/dashboard/AgruparAplicaciones.vue'
 import EliminarLog from '../views/procesos/EliminarLog.vue';
 import Postman from '../views/procesos/Postman.vue';
+import RegistrarUser from '../views/seguridad/RegistrarUser.vue';
 
 Vue.use(VueRouter)
 
@@ -58,6 +59,12 @@ const routes = [
         path: '/postman',
         name: 'Postman',
         component: Postman
+      },
+      {
+        title: 'RegistrarUser',
+        path: '/registrarUser',
+        name: 'registrarUser',
+        component: RegistrarUser
       },
     ]
   }
