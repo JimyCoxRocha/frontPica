@@ -32,7 +32,7 @@
                 autocomplete="off"
                 :type="showPass ? 'text' : 'password'"
               ></v-text-field>
-              
+              <p class="ma-0 mb-5 pa-0 error" v-show="errorDetected">Ha ocurrido el siguiente error: {{messageErrorDetected}}</p>
           <v-col
           class="d-flex ma-0 pa-0"
           cols="12"
@@ -80,7 +80,9 @@ import { login } from "../services/DataServices.js";
           password: '',
           showPass: false,
           defaultSelected: 'Prueba',
-          items: ['Producción', 'Prueba']
+          items: ['Producción', 'Prueba'],
+          errorDetected: false,
+          messageErrorDetected: ""
       }),
       methods:{
          async iniciarSesion(){
@@ -88,15 +90,30 @@ import { login } from "../services/DataServices.js";
             user: this.user,
             password: this.password
           }
+          if (this.user.trim() === "" || this.password.trim() === ""){
+              this.errorDetected = true;
+              this.messageErrorDetected = "Por favor, debe ingresar los datos solicitados";
+              return;
+          }
           login(payload)
-          .then(() =>{
-              this.$router.push('/home');
-            }
-          )
-          .catch( error =>{
+          .then((data="") =>{
+            console.log(data);
+              if(data !== ""){
+                this.errorDetected = true;
+                this.messageErrorDetected = data.data;
+              }else{
+                this.errorDetected = false;
+                this.$router.push('/home');
+              }
+
+            })
+          /* .catch( error =>{
+            this.errorDetected = true;
             console.error(error);
-          });
+          }); */
         }
+      },
+      components: {
       }
     }
 </script>

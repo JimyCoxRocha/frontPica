@@ -4,5 +4,5 @@ export let consultaReporte = {
         fecha_hasta: "",
         servicio: "",
         categoria: "",
-        modulo: "pica",
+        modulo: "pos-pica",
     }

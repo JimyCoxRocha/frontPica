@@ -9,7 +9,15 @@
           >
           <v-toolbar-title>{{tipoReporte}}</v-toolbar-title>
         </v-toolbar>
-        <div class="mt-10 mr-4 ml-4 mb-10">
+        <v-progress-circular
+          :size="50"
+          color="primary"
+          indeterminate
+          v-show="loadingCatalogue"
+        ></v-progress-circular>
+        <p class="ma-0 ba-0" v-show="loadingCatalogue"> Cargando catálogo...</p>
+        <p class="ma-0 mb-5 pa-0 error white--text" v-show="errorDetected">Ha ocurrido el siguiente error: {{messageErrorDetected}}</p>
+        <div class="mt-10 mr-4 ml-4 mb-10" v-show="dataInitialLoaded">
           <div>
             <v-row
             >
@@ -92,19 +100,28 @@
   import moment from 'moment';
   import Boton from '../../components/Boton.vue';
   import TableReporte from '../../components/TableReporte.vue';
-  import { findAllLogDebug } from '../../services/DataServices';
+  import { findReports, findCataloguesOptions } from '../../services/DataServices';
   import { consultaReporte } from '../../types/objetoConsultaReporte.js';
   import { convertToPdf } from "../../helpers/convertToPdf.js";
   import { convertToExcel } from "../../helpers/convertToExcel.js";
   import { btnBuscar, exportarPDF, exportarExcel } from "../../types/btnDesign.js";
   
+  const CATEGORIAS= "category";
+  const SERVICIOS= "service";
+  const MODULOS= "module";
+
   export default {
       name: "LogError",
+      created(){
+        this.cargarCatalogos();
+      },
       data: () => ({
         tipoReporte: "Reporte de Logs Error",
         fechaActual: moment(Date.now()).format('YYYY-MM-DD'),
         valorFechaDesde: moment(Date.now()).subtract(1, 'day').format('YYYY-MM-DD'),
         valorFechaHasta: moment(Date.now()).format('YYYY-MM-DD'),
+        errorDetected: false,
+        messageErrorDetected: "",
         inputSelected: {
             keyModulo: "pica",
             keyCategoria: "all",
@@ -145,7 +162,9 @@
         exportarPDF,
         exportarExcel,
         dataSolicitada: [],
-        loading: false
+        loading: false,
+        loadingCatalogue: true,
+        dataInitialLoaded: false
       }),
       components:{
         Boton,
@@ -154,18 +173,70 @@
         Select
       },
       methods:{
+          async cargarCatalogos(){
+            this.loadingCatalogue= true;
+            this.dataInitialLoaded = false;
+            this.errorDetected = false;
+            this.messageErrorDetected = "";
+
+            try{
+              this.modulos = await this.cargarCatalogo(MODULOS);
+              this.inputSelected['keyModulo'] = this.modulos[0];
+
+              this.servicios = await this.cargarCatalogo(SERVICIOS);
+              this.inputSelected['keyService'] = this.servicios[0];
+
+              this.categorias = await this.cargarCatalogo(CATEGORIAS);
+              this.inputSelected['keyService'] = this.categorias[0];
+              
+              this.loadingCatalogue= false;
+              this.dataInitialLoaded = true;
+            }catch(err){
+              this.errorDetected = true;
+              this.messageErrorDetected = err;
+              this.loadingCatalogue= false;
+              this.dataInitialLoaded = false;
+            }
+          },
+          async cargarCatalogo(tipoCatalogo){
+            //Llenamos los módulos
+            return await findCataloguesOptions(tipoCatalogo)
+            .then((data)=>{
+              if(data.data.length > 0 && data.status < 400){
+                return data.data;
+              }else if(data.status > 400){
+                throw `Carga de ${tipoCatalogo}: `+ JSON.stringify(data.data);
+              }else{
+                return [];
+              }
+            })
+            .catch(err => {
+              throw err;
+            });
+          },
           async clickBuscar(){
+            this.errorDetected = false;
+            this.messageErrorDetected = "";
             consultaReporte.fecha_desde = this.valorFechaDesde;
             consultaReporte.fecha_hasta = this.valorFechaHasta;
             consultaReporte.categoria = this.inputSelected.keyCategoria;
             consultaReporte.servicio = this.inputSelected.keyService;
             this.loading = true;
-            this.dataSolicitada = await findAllLogDebug(consultaReporte)
+            this.dataSolicitada = await findReports("logError", consultaReporte)
             .then((data)=>{
-              if(data != [{}] && data != null){
+              if(data.data.length > 0 && data.status < 400){
                 this.btnDisabled = false;
+                this.errorDetected = false;
+                this.messageErrorDetected = "";
+                return data.data;
+              }else if(data.status > 400){
+                this.btnDisabled = true;
+                this.errorDetected = true;
+                this.messageErrorDetected = data.data;
+                return [];
+              }else{
+                return [];
               }
-              return data;
             })
             .catch(err => {
               console.log(err);

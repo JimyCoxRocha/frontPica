@@ -109,7 +109,7 @@ import DatePicker from '../../components/DatePicker.vue';
 import Boton from '../../components/Boton.vue';
 import TableSelect from "../../components/TableSelect.vue";
 import { btnBuscar, btnDelete } from "../../types/btnDesign.js";
-import { findAllLogDebug } from '../../services/DataServices';
+import { findReports } from '../../services/DataServices';
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
 
 export default {
@@ -138,7 +138,7 @@ export default {
             consultaReporte.fecha_desde = this.valorFechaDesde;
             consultaReporte.fecha_hasta = this.valorFechaHasta;
             this.loading = true;
-            this.dataSolicitada = await findAllLogDebug(consultaReporte)
+            this.dataSolicitada = await findReports("all",consultaReporte)
             .then((data)=>{
               if(data != [{}] && data != null){
                 this.btnDisabled = false;

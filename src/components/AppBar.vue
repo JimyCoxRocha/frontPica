@@ -23,7 +23,6 @@ export default {
     name: 'AppBar',
     mounted(){
         this.user=findLocalStorage('user');
-        console.log(this.user);
     },
     data(){
         return{

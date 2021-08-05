@@ -3,10 +3,10 @@ import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
 import { obtenerClaveValorPostman } from '../helpers/obtenerClaveValorPostman.js';
 import { generarResponsePostman } from '../helpers/generarResponsePostman.js';
 const baseUrl = 'https://my-json-server.typicode.com/JimyCoxRocha/apiPIKA';
-const baseUrlDebug = 'https://my-json-server.typicode.com/JimyCoxRocha/dataTable/all'
+const baseUrlDebug = 'https://my-json-server.typicode.com/JimyCoxRocha/dataTable'
 
 export const login = async function(payload) {
-    await axios.get(`${baseUrl}/login`,{ params: { user: payload.user , password: payload.password} })
+    return await axios.get(`${baseUrl}/login`,{ params: { user: payload.user , password: payload.password} })
     .then(resp => {
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + resp.data.output.token;//Token
       saveLocalStorage('token', resp.data.output.token);
@@ -14,24 +14,24 @@ export const login = async function(payload) {
       saveLocalStorage('menu', JSON.stringify(resp.data.output.menu));
     })
     .catch(error => {
-        console.error(error);
-      throw error;
+      return error.response;
     })
 
 }
 
-export const findAllLogDebug = async function() {
+export const findReports = async function(tipoReporte="auditoria", params) {
   let datosRecibidos = [{}];
-  await axios.get(`${baseUrlDebug}`) 
+  return await axios.get(
+    `${baseUrlDebug}/${tipoReporte}`,{ 
+      params: { ...params } }) 
   .then(resp => {
-    datosRecibidos = resp.data;
+    datosRecibidos = resp;
     return datosRecibidos;
   })
   .catch(error => {
       console.error(error);
-    throw error;
+      return error.response;
   })
-  return datosRecibidos;
 
 }
 
@@ -46,7 +46,6 @@ export const peticionPostman = async function(objPostman){
     headers: obtenerClaveValorPostman(objPostman.elementosHeaders),
     data: {...objPostman.dataJSONEnvio, ...obtenerClaveValorPostman(objPostman.elementosParams)},
   }) 
-
 
   .then(resp => {
     console.log(resp);
@@ -65,14 +64,16 @@ export const peticionPostman = async function(objPostman){
   return objetoResp;
 }
 
-/*  export async function storiesWithItems(){
-     let items = [];
-     getTopStories().then(stories => {
-          stories.forEach(id => {
-           axios.get(`${baseUrl}/item/${id}.json`).then( res => {
-            items.push(res.data);
-           });
-          });   
-     });
-     return items;
- } */
+export const findCataloguesOptions = async function(opcion) {
+  let datosRecibidos = [];
+  return await axios.get(`${baseUrlDebug}/${opcion}`) 
+  .then(resp => {
+    datosRecibidos = resp;
+    return datosRecibidos;
+  })
+  .catch(error => {
+      console.error(error);
+      return error.response;
+  })
+
+}
