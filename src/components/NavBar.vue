@@ -1,9 +1,11 @@
 <template>
    <v-navigation-drawer 
-        v-model="sidebarMenu" 
+        v-model="mostrarMenu"
         app
-        floating
         color="secondary"
+        :value="mostrar()"
+        v-click-outside="hideDrawer"
+        :width="widthTotal"
         >
         <v-list dense color="baseColor" dark>
             <v-list-item>
@@ -50,18 +52,61 @@ export default {
         handleNavBar:{
             type: Function
         },
+        initialValueDisplayMdAndDown:{
+            type: Function
+        },
+        initialValueDisplayLgAndUp:{
+            type: Function
+        },
         menuData: {
             type: Array,
             required: false // User can accept a userData object on params, or not. It's totally optional.
+        },
+        handleNav:{
+            type: Function
         }
     },
-    computed: {
-      double() {
-        return this.value * 2;
-      }
-    },
     methods:{
+        mostrar: function(){
+            if(this.sidebarMenu){
+                this.mostrarMenu = true;
+            }else{
+                this.mostrarMenu = false;
+            }
+                console.log("Menu: "+this.mostrarMenu+" Sidebar: "+this.sidebarMenu);
+            //console.log("1Menu: "+this.mostrarMenu+" 1Sidebar: "+this.sidebarMenu);
+            //this.handleNavBar();
+        },
+         hideDrawer(e) {
+             if(e.target.className === "v-overlay__scrim") {
+                    
+                    this.handleNavBar();
+                    this.mostrarMenu = this.sidebarMenu;
+                }
+        }
+
+    },
+    computed:{
+        widthTotal (){
+            /* if(this.$vuetify.breakpoint.lgAndUp){
+                console.log("LG");
+                console.log("Menu: "+this.mostrarMenu+" Sidebar: "+this.sidebarMenu);
+                this.initialValueDisplayLgAndUp();
+            }
+            if(this.$vuetify.breakpoint.mdAndDown){
+                console.log("md");
+                console.log("1Menu: "+this.mostrarMenu+" 1Sidebar: "+this.sidebarMenu);
+                this.initialValueDisplayMdAndDown();
+            } */
+            /* console.log("Breack: "+ this.$vuetify.breakpoint.name);
+            
+            if( this.mostrarMenu !== this.sidebarMenu){
+                    this.handleNavBar();
+                }*/
+                    return 256;
+        }
     }
+    
 
 }
 </script>

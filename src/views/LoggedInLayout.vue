@@ -1,7 +1,11 @@
 <template>
   <div>
         <AppBar :handleNavBar="handleMenu"/>
-        <NavBar :sidebarMenu="sidebarMenu" :handleNavBar="handleMenu" :menuData="menuData"/>
+        <NavBar :sidebarMenu="sidebarMenu" 
+                :handleNavBar="handleMenu" 
+                :menuData="menuData" 
+                :initialValueDisplayLgAndUp="initialValueDisplayLgAndUp"
+                :initialValueDisplayMdAndDown="initialValueDisplayMdAndDown"/>
         
         <v-main class="stylesHome">
             <v-container fill-height>
@@ -31,9 +35,25 @@
             AppBar,
             NavBar  
         },
+/*         computed:{
+            width(){
+                if (this.$vuetify.breakpoint.smAndDown) {
+                    return this.sidebarMenu = false;
+                }
+            }
+        }, */
         methods:{
             handleMenu(){
-              this.sidebarMenu = !this.sidebarMenu;  
+                this.sidebarMenu = !this.sidebarMenu;  
+               
+            },
+            initialValueDisplayLgAndUp(){
+                this.sidebarMenu = true;
+                console.log("initialValueDisplayLgAndUp: "+this.sidebarMenu);
+            },
+            initialValueDisplayMdAndDown(){
+                this.sidebarMenu = false;
+                console.log("initialValueDisplayMdAndDown: "+this.sidebarMenu);
             }
         },
     }
