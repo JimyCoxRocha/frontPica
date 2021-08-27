@@ -38,3 +38,9 @@ export const btnGuardar = {
     texto: "Guardar",
     color: "primary",
 }
+
+export const btnAgregar = {
+    icon: "mdi-plus",
+    texto: "Agregar",
+    color: "secondary",
+}

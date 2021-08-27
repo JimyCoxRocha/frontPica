@@ -16,13 +16,14 @@ export default {
     name: "Option",
     data(){
         return{
-            opcionUrl: "/hola"
+            opcionUrl: "/home"
         }
     },
     props:{
        opcionName: String
     },
     mounted(){
+        //Método para obtener las rutas
         this.opcionUrl = obtenerRutasModulo(this.opcionName);
     }
 }

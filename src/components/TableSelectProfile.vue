@@ -19,10 +19,10 @@
 </template>
 
 <script>
-  export default {
-    name: "TableSelect",
+export default {
+    name: "TableSelectLog",
     data () {
-      return {
+        return {
         singleSelect: false,
         selected: [],
         headers: [
@@ -38,7 +38,6 @@
           { text: 'Input', value: 'dataInput' },
           { text: 'Output', value: 'dataOutput' },
         ],
-        
       }
     },
     props: {
@@ -51,7 +50,7 @@
             require: true
         }
     },
-  }
+}
 </script>
 
 <style>

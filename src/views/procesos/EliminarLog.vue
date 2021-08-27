@@ -96,8 +96,12 @@
             >
             </v-progress-linear>
                 <p v-show="loading">Cargando los datos...</p>
-
-            <TableSelect :items="dataSolicitada" :obtenerSelecion="obtenerSelecion"/>
+                <TableSelectLog 
+                    :items="dataSolicitada" 
+                    :obtenerSelecion="obtenerSelecion" 
+                    :headers="headers" 
+                    itemKey="dateOutput"
+                    :columnEdit="false"/>
             </div>
         </div>
     </v-container>
@@ -107,7 +111,7 @@
 import moment from 'moment';
 import DatePicker from '../../components/DatePicker.vue';
 import Boton from '../../components/Boton.vue';
-import TableSelect from "../../components/TableSelect.vue";
+import TableSelectLog from "../../components/TableSelectLog.vue";
 import { btnBuscar, btnDelete } from "../../types/btnDesign.js";
 import { findReports } from '../../services/DataServices';
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
@@ -126,12 +130,25 @@ export default {
         loading: false,
         btnDisabled: true,
         dialog: false,
-        selected: []
+        selected: [],
+        headers: [
+          {
+            text: 'Path categoría',
+            align: 'start',
+            sortable: false,
+            value: 'pathController',
+          },
+          { text: 'Path endpoint', value: 'pathEndpoint' },
+          { text: 'Endpoint', value: 'endpoint' },
+          { text: 'Fecha', value: 'dateOutput' },
+        //   { text: 'Input', value: 'dataInput' },
+        //   { text: 'Output', value: 'dataOutput' },
+        ],
     }),
     components:{
         DatePicker,
         Boton,
-        TableSelect
+        TableSelectLog
     },
     methods:{
         async clickBuscar(){
@@ -143,7 +160,7 @@ export default {
               if(data != [{}] && data != null){
                 this.btnDisabled = false;
               }
-              return data;
+              return data.data;
             })
             .catch(err => {
               console.log(err);

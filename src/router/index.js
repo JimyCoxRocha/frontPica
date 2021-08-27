@@ -9,6 +9,7 @@ import AgruparAplicaciones from '../views/dashboard/AgruparAplicaciones.vue'
 import EliminarLog from '../views/procesos/EliminarLog.vue';
 import Postman from '../views/procesos/Postman.vue';
 import RegistrarUser from '../views/seguridad/RegistrarUser.vue';
+import Mantenimiento from '../views/seguridad/Mantenimiento.vue';
 
 Vue.use(VueRouter)
 
@@ -66,6 +67,12 @@ const routes = [
         name: 'registrarUser',
         component: RegistrarUser
       },
+      {
+        title: 'MantenimientoPerfil',
+        path: '/mantenimiento',
+        name: 'Mantenimiento',
+        component: Mantenimiento
+      }
     ]
   }
 ]

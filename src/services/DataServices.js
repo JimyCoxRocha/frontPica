@@ -19,14 +19,12 @@ export const login = async function(payload) {
 
 }
 
-export const findReports = async function(tipoReporte="auditoria", params) {
-  let datosRecibidos = [{}];
+export const findReports = async function(tipoReporte="auditoria"/*, params*/) {
   return await axios.get(
-    `${baseUrlDebug}/${tipoReporte}`,{ 
-      params: { ...params } }) 
+    `${baseUrlDebug}/${tipoReporte}`) 
   .then(resp => {
-    datosRecibidos = resp;
-    return datosRecibidos;
+    console.log(resp.data);
+    return resp;
   })
   .catch(error => {
       console.error(error);
