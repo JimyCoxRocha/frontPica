@@ -41,6 +41,6 @@ export const btnGuardar = {
 
 export const btnAgregar = {
     icon: "mdi-plus",
-    texto: "Agregar",
+    texto: "",
     color: "secondary",
 }

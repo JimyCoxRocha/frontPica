@@ -4,7 +4,6 @@
         app
         color="secondary"
         :value="mostrar()"
-        v-click-outside="hideDrawer"
         :width="widthTotal"
         >
         <v-list dense color="baseColor" dark>
@@ -77,13 +76,14 @@ export default {
             //console.log("1Menu: "+this.mostrarMenu+" 1Sidebar: "+this.sidebarMenu);
             //this.handleNavBar();
         },
-         hideDrawer(e) {
+         /* hideDrawer(e) {
+             //Usar este v-click-outside="hideDrawer"
              if(e.target.className === "v-overlay__scrim") {
                     
                     this.handleNavBar();
                     this.mostrarMenu = this.sidebarMenu;
                 }
-        }
+        } */
 
     },
     computed:{

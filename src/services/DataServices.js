@@ -2,11 +2,38 @@ import axios from 'axios';
 import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
 import { obtenerClaveValorPostman } from '../helpers/obtenerClaveValorPostman.js';
 import { generarResponsePostman } from '../helpers/generarResponsePostman.js';
-const baseUrl = 'https://my-json-server.typicode.com/JimyCoxRocha/apiPIKA';
-const baseUrlDebug = 'https://my-json-server.typicode.com/JimyCoxRocha/dataTable'
+const urlMdw = 'https://my-json-server.typicode.com/JimyCoxRocha';
+
+export const findProfiles = async function(){
+  return await axios.get(`${urlMdw}/ge-profiles/perfil`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
+export const findProfileOptions= async function({idProfile}){
+  return await axios.get(`${urlMdw}/profiles-in-options/all?${idProfile}`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
+export const disableProfile= async function({idProfile}){
+  return await axios.get(`${urlMdw}/disable/disable?${idProfile}`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
+export const enableProfile= async function({idProfile}){
+  return await axios.get(`${urlMdw}/enable/enable?${idProfile}`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
 
 export const login = async function(payload) {
-    return await axios.get(`${baseUrl}/login`,{ params: { user: payload.user , password: payload.password} })
+    return await axios.get(`${urlMdw}/apiPIKA/login`,{ params: { user: payload.user , password: payload.password} })
     .then(resp => {
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + resp.data.output.token;//Token
       saveLocalStorage('token', resp.data.output.token);
@@ -21,7 +48,7 @@ export const login = async function(payload) {
 
 export const findReports = async function(tipoReporte="auditoria"/*, params*/) {
   return await axios.get(
-    `${baseUrlDebug}/${tipoReporte}`) 
+    `${urlMdw}/dataTable/${tipoReporte}`) 
   .then(resp => {
     console.log(resp.data);
     return resp;
@@ -64,7 +91,7 @@ export const peticionPostman = async function(objPostman){
 
 export const findCataloguesOptions = async function(opcion) {
   let datosRecibidos = [];
-  return await axios.get(`${baseUrlDebug}/${opcion}`) 
+  return await axios.get(`${urlMdw}/dataTable/${opcion}`) 
   .then(resp => {
     datosRecibidos = resp;
     return datosRecibidos;
