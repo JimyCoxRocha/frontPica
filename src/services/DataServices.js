@@ -32,6 +32,20 @@ export const enableProfile= async function({idProfile}){
   });
 }
 
+export const updateProfileInOption= async function(profileInOptionUpdates){
+  return await axios.get(`${urlMdw}/update-profile/update`, profileInOptionUpdates)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
+export const saveProfile= async function(name, description){
+  return await axios.get(`${urlMdw}/create-profile/create`, {name, description})
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
 export const login = async function(payload) {
     return await axios.get(`${urlMdw}/apiPIKA/login`,{ params: { user: payload.user , password: payload.password} })
     .then(resp => {

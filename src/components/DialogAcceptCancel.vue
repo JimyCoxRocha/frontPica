@@ -26,6 +26,9 @@
 <script>
 export default {
     name: "DialogAcceptCancel",
+    estroyed: function() {
+        console.log("Se actualizó el dialogo: ");
+    },
     data: () =>({
         
     }),

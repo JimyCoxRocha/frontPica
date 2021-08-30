@@ -30,6 +30,7 @@
                 :deleteItem = "disableItem"
             />
             <v-dialog
+                v-if= "dialogEdit"
                 v-model="dialogEdit"
                 persistent
                 max-width="70%"
@@ -41,7 +42,11 @@
                         </v-toolbar-title>
                         <v-spacer></v-spacer>
                     </v-toolbar>
-
+                    <v-container v-if = "showAlertNoChange">
+                        <v-alert
+                            type="info"
+                        > Debe realizar algún cambio </v-alert>
+                    </v-container>
                     <v-card-text>
                         <v-container>
                             <v-row>
@@ -122,6 +127,95 @@
             </DialogAcceptCancel>
 
             <DialogAcceptCancel 
+                :activeDialog = "dialogAddProfile"
+            >
+                <template slot="titleCard">
+                    <span class="text-h5">Agregar Perfil</span>
+                </template>
+                <template slot="mainDialog">
+                    <v-container v-if = "showAlertNoData">
+                        <v-alert
+                            type="info"
+                        > Debe ingresar los datos </v-alert>
+                    </v-container>
+                    <v-container>
+                       <v-row
+                       > 
+                            <v-col
+                                cols="12"
+                                md="6"
+                            >
+                                <v-row>
+                                    <v-col
+                                        class="pr-0"
+                                        cols="2"
+                                        md="2"
+                                    >
+                                        <p class="text-right ma-0 mt-2">Nombre:</p>
+                                    </v-col>
+                                    <v-col
+                                        class="pr-0"
+                                        cols="9"
+                                        md="10"
+                                    >
+                                        <TextFieldSimpleData 
+                                            v-if= "dialogAddProfile"
+                                            v-model="nameProfile"
+                                            label= "Nombre del perfil"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                            <v-col
+                                cols="12"
+                                md="6"
+                            >
+                                <v-row>
+                                    <v-col
+                                        class="pr-0"
+                                        cols="2"
+                                        md="3"
+                                    >
+                                        <p class="text-right ma-0 mt-2">Descripción:</p>
+                                    </v-col>
+                                    <v-col
+                                        class="pr-0"
+                                        cols="9"
+                                        md="8"
+                                    >
+                                        <TextFieldSimpleData 
+                                            v-if= "dialogAddProfile"
+                                            v-model="descriptionProfile"
+                                            label= "Descripción del perfil"
+                                        />
+                                    </v-col>
+                                </v-row>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                        
+                </template>
+                <template slot="cancel">
+                    <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="closeDialog"
+                    >
+                        Cancelar
+                    </v-btn>
+                </template>
+                <template slot="accept">
+                    <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="addProfile"
+                    >
+                        Guardar
+                    </v-btn>
+                </template>
+            </DialogAcceptCancel>
+
+            <DialogAcceptCancel 
                 :activeDialog = "dialogDisableProfile"
             >
                 <template slot="titleCard">
@@ -166,10 +260,11 @@
 import { btnAgregar } from "../../types/btnDesign.js";
 import Boton from "../../components/Boton.vue";
 import TableEditAndDelete from "../../components/TableEditAndDelete.vue";
-import { findProfiles, findProfileOptions, enableProfile, disableProfile } from '../../services/DataServices';
+import { findProfiles, findProfileOptions, enableProfile, disableProfile, updateProfileInOption, saveProfile } from '../../services/DataServices';
 import { setterProfilesInOptionsActives, createProfilesInOptionsUpdates } from '../../helpers/setterData';
 import ChargeData from "../../components/ChargeData.vue";
 import DialogAcceptCancel from "../../components/DialogAcceptCancel.vue";
+import TextFieldSimpleData from "../../components/TextFieldSimpleData.vue";
 import CardProfile from "../../components/CardProfile.vue";
 import { findLocalStorage } from "../../helpers/handleLocalStorage.js";
 
@@ -188,7 +283,12 @@ export default {
         dialogEdit: false,
         dialogEnableProfile: false,
         dialogDisableProfile: false,
+        dialogAddProfile: false,
         editProfileSelected: 0,
+        showAlertNoChange: false,
+        showAlertNoData: false,
+        nameProfile: "",
+        descriptionProfile: "",
         selected: [],
         profiles: [],
         moduleItems: [],
@@ -211,7 +311,9 @@ export default {
     },
     methods:{
         clickAgregar(){
-            console.log("Se agrego");
+            this.dialogAddProfile = true;
+            this.nameProfile = "";
+            this.descriptionProfile = "";
         },
         obtenerSelecion(elementos){
             this.selected = elementos;
@@ -252,16 +354,9 @@ export default {
             })
             .catch(error => {
                 console.log(error);
-                /* this.errorDetected = true;
-                this.messagesErrorDetected = error.response.messages; */
                 return [];
             });
             this.dialogEdit = true;
-
-            // this.editedIndex = this.items.indexOf(item);
-            // console.log(this.editedIndex);
-            // this.editedItem = Object.assign({}, item)
-            // this.dialog = true
         },
         closeEditProfile () {
             this.dialogEdit = false;
@@ -280,11 +375,12 @@ export default {
             await disableProfile(this.editProfileSelected)
             .then((resp)=>{
                 console.log(resp.data);
-                return resp.data;
             })
             .catch(error => {
-                console.log(error.response.data.error);//Acceder a .messages y mostrar el mensaje
-                return "";
+                if(error.response.data.error === undefined)
+                        console.log("No se ha podido acceder al endpoint");
+                else
+                    console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
             });
             this.closeDialog();
         },
@@ -292,27 +388,61 @@ export default {
             await enableProfile(this.editProfileSelected)
             .then((resp)=>{
                 console.log(resp.data);
-                return resp.data;
             })
             .catch(error => {
-                console.log(error.response.data.error);//Acceder a .messages y mostrar el mensaje
-                return "";
+                if(error.response.data.error === undefined)
+                        console.log("No se ha podido acceder al endpoint");
+                else
+                    console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
             });
             this.closeDialog();
+        },
+        async saveProfile () {
+            try {
+                const profileInOptionUpdates = createProfilesInOptionsUpdates(
+                    this.selected, this.moduleItems, 
+                    this.editProfileSelected, this.user=findLocalStorage('user'));
+                await updateProfileInOption(profileInOptionUpdates)
+                    .then((resp)=>{
+                        console.log(resp.data);
+                    })
+                    .catch(error => {
+                        if(error.response.data.error === undefined)
+                            console.log("No se ha podido acceder al endpoint");
+                        else
+                            console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
+                    });
+                this.closeEditProfile();
+            } catch (error) {
+                this.showAlertNoChange = true;
+                this.selected = setterProfilesInOptionsActives(this.moduleItems);
+            }
+        },
+        async addProfile () {
+            this.showAlertNoData = false;
+            try {
+                if((this.nameProfile.trim() === '') || (this.descriptionProfile.trim() === ''))
+                    throw "Debe ingresar los datos";
+
+                await saveProfile(this.nameProfile, this.descriptionProfile)
+                .then((resp)=>{
+                    console.log(resp.data);
+                })
+                .catch(error => {
+                    if(error.response.data.error === undefined)
+                        console.log("No se ha podido acceder al endpoint");
+                    else
+                        console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
+                });
+                this.closeDialog();
+            } catch (error) {
+                this.showAlertNoData = true;
+            }
         },
         closeDialog(){
             this.dialogDisableProfile = false;
             this.dialogEnableProfile = false;
-        },
-        saveProfile () {
-            
-            createProfilesInOptionsUpdates(this.selected, this.moduleItems, this.editProfileSelected, this.user=findLocalStorage('user'));
-            /* if (this.editedIndex > -1) {
-            Object.assign(this.desserts[this.editedIndex], this.editedItem)
-            } else {
-            this.desserts.push(this.editedItem)
-            } */
-            this.closeEditProfile()
+            this.dialogAddProfile = false;
         }
     },
     components:{
@@ -320,7 +450,8 @@ export default {
         TableEditAndDelete,
         ChargeData,
         CardProfile,
-        DialogAcceptCancel
+        DialogAcceptCancel,
+        TextFieldSimpleData
     }
 }
 </script>

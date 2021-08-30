@@ -28,6 +28,9 @@ export const createProfilesInOptionsUpdates = (optionsSelected, modules, idProfi
                 optionsUpdates.push(optionSetter);
             }
         }
+        if(optionsUpdates.length === 0){
+            throw "Debe realizar cambios";
+        }
         const profileInOptionUpdates = {
             idProfile: idProfile.idProfile, 
             usernameAdmin: user,
