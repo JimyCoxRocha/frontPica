@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import PanelOption from "../components/PanelOption.vue";
+import PanelOption from "./PanelOption.vue";
 export default {
     name: 'NavBar',
     data(){

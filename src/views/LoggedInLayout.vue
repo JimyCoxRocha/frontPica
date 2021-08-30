@@ -1,14 +1,44 @@
 <template>
   <div>
         <AppBar :handleNavBar="handleMenu"/>
-        <NavBar :sidebarMenu="sidebarMenu" 
-                :handleNavBar="handleMenu" 
+        <!-- <NavBar :sidebarMenu="sidebarMenu" 
+                :handleNavBar="handleMenu"
                 :menuData="menuData" 
                 :initialValueDisplayLgAndUp="initialValueDisplayLgAndUp"
-                :initialValueDisplayMdAndDown="initialValueDisplayMdAndDown"/>
-        
+                :initialValueDisplayMdAndDown="initialValueDisplayMdAndDown"/> -->
+        <v-navigation-drawer 
+        v-model="sidebarMenu"
+        app
+        color="secondary"
+        >
+            <v-list dense color="baseColor" dark>
+                <v-list-item>
+                    <v-list-item-content>
+                        <v-list-item-title>
+                        <v-img alt="Vue logo" src="../assets/pycca.jpg" max-width="500" width="100%"></v-img>
+                        </v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+            </v-list>
+            
+            <v-divider></v-divider>
+
+            <v-list>
+                <v-list-item
+                    
+                    v-for="(menuItem,i) in menuData"
+                    :key="i" class="pa-0 secondary">
+                    <PanelOption 
+                        :nameModule="menuItem.module" 
+                        :icon="menuItem.icon" 
+                        :options="menuItem.items" />
+                </v-list-item>
+
+            </v-list>
+        </v-navigation-drawer>
+
         <v-main class="stylesHome">
-            <v-container fill-height>
+            <v-container :fluid="true" fill-height>
                 <router-view></router-view>
             </v-container>
         </v-main>
@@ -17,8 +47,8 @@
 
 <script>
     import AppBar from '../components/AppBar.vue';
-    import NavBar from '../components/NavBar.vue';
     import { findLocalStorage } from '../helpers/handleLocalStorage.js';
+    import PanelOption from "../components/PanelOption.vue";
 
     export default {
         name:"Home",
@@ -33,27 +63,11 @@
         },
         components: {
             AppBar,
-            NavBar  
+            PanelOption 
         },
-/*         computed:{
-            width(){
-                if (this.$vuetify.breakpoint.smAndDown) {
-                    return this.sidebarMenu = false;
-                }
-            }
-        }, */
         methods:{
             handleMenu(){
-                this.sidebarMenu = !this.sidebarMenu;  
-               
-            },
-            initialValueDisplayLgAndUp(){
-                this.sidebarMenu = true;
-                console.log("initialValueDisplayLgAndUp: "+this.sidebarMenu);
-            },
-            initialValueDisplayMdAndDown(){
-                this.sidebarMenu = false;
-                console.log("initialValueDisplayMdAndDown: "+this.sidebarMenu);
+                this.sidebarMenu = !this.sidebarMenu;
             }
         },
     }

@@ -42,7 +42,7 @@
                         </v-toolbar-title>
                         <v-spacer></v-spacer>
                     </v-toolbar>
-                    <v-container v-if = "showAlertNoChange">
+                    <v-container v-if = "showAlertInfo">
                         <v-alert
                             type="info"
                         > Debe realizar algún cambio </v-alert>
@@ -76,7 +76,7 @@
                         <v-btn
                             color="blue darken-1"
                             text
-                            @click="closeEditProfile"
+                            @click="closeDialog"
                         >
                             Cancelar
                         </v-btn>
@@ -133,7 +133,7 @@
                     <span class="text-h5">Agregar Perfil</span>
                 </template>
                 <template slot="mainDialog">
-                    <v-container v-if = "showAlertNoData">
+                    <v-container v-if = "showAlertInfo">
                         <v-alert
                             type="info"
                         > Debe ingresar los datos </v-alert>
@@ -279,26 +279,19 @@ export default {
         loading: true,
         messagesErrorDetected: [],
         errorDetected: false,
-        showButonDelete: false,
         dialogEdit: false,
         dialogEnableProfile: false,
         dialogDisableProfile: false,
         dialogAddProfile: false,
         editProfileSelected: 0,
-        showAlertNoChange: false,
-        showAlertNoData: false,
+        showAlertInfo: false,
         nameProfile: "",
         descriptionProfile: "",
         selected: [],
         profiles: [],
         moduleItems: [],
         headers: [
-          {
-            text: 'ID',
-            align: 'start',
-            sortable: false,
-            value: 'idProfile',
-          },
+          { text: 'ID', align: 'start', sortable: false, value: 'idProfile', },
           { text: 'Perfil', value: 'name' },
           { text: 'Estado', value: 'status' },
           { text: 'Opciones', value: 'numOptions' },
@@ -306,23 +299,7 @@ export default {
           { text: 'Acciones', value: 'acciones', sortable: false }
         ],
     }),
-    computed:{
-        
-    },
     methods:{
-        clickAgregar(){
-            this.dialogAddProfile = true;
-            this.nameProfile = "";
-            this.descriptionProfile = "";
-        },
-        obtenerSelecion(elementos){
-            this.selected = elementos;
-            if(this.selected.length > 0){
-                this.showButonDelete = true;
-            }else{
-                this.showButonDelete = false;
-            }
-        },
         async getProfiles(){
             this.loading = true;
             this.profiles = await findProfiles()
@@ -358,26 +335,13 @@ export default {
             });
             this.dialogEdit = true;
         },
-        closeEditProfile () {
-            this.dialogEdit = false;
-            this.selected = [];
-            this.moduleItems = [];
-        },
-        disableItem (idProfile) {
-            this.editProfileSelected = idProfile;
-            this.dialogDisableProfile = true;
-        },
-        enableItem(idProfile){
-            this.editProfileSelected = idProfile;
-            this.dialogEnableProfile = true;
-        },
         async disableProfile(){
             await disableProfile(this.editProfileSelected)
             .then((resp)=>{
                 console.log(resp.data);
             })
             .catch(error => {
-                if(error.response.data.error === undefined)
+                if(!error.response.data.error)
                         console.log("No se ha podido acceder al endpoint");
                 else
                     console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
@@ -390,7 +354,7 @@ export default {
                 console.log(resp.data);
             })
             .catch(error => {
-                if(error.response.data.error === undefined)
+                if(!error.response.data.error)
                         console.log("No se ha podido acceder al endpoint");
                 else
                     console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
@@ -407,19 +371,18 @@ export default {
                         console.log(resp.data);
                     })
                     .catch(error => {
-                        if(error.response.data.error === undefined)
+                        if(!error.response.data.error)
                             console.log("No se ha podido acceder al endpoint");
                         else
                             console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
                     });
-                this.closeEditProfile();
+                this.closeDialog();
             } catch (error) {
-                this.showAlertNoChange = true;
+                this.showAlertInfo = true;
                 this.selected = setterProfilesInOptionsActives(this.moduleItems);
             }
         },
         async addProfile () {
-            this.showAlertNoData = false;
             try {
                 if((this.nameProfile.trim() === '') || (this.descriptionProfile.trim() === ''))
                     throw "Debe ingresar los datos";
@@ -429,21 +392,34 @@ export default {
                     console.log(resp.data);
                 })
                 .catch(error => {
-                    if(error.response.data.error === undefined)
+                    if(!error.response.data.error)
                         console.log("No se ha podido acceder al endpoint");
                     else
                         console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
                 });
                 this.closeDialog();
             } catch (error) {
-                this.showAlertNoData = true;
+                this.showAlertInfo = true;
             }
         },
         closeDialog(){
             this.dialogDisableProfile = false;
             this.dialogEnableProfile = false;
             this.dialogAddProfile = false;
-        }
+            this.dialogEdit = false;
+            this.showAlertInfo = false;
+        },
+        clickAgregar(){
+            this.dialogAddProfile = true;
+        },
+        disableItem (idProfile) {
+            this.editProfileSelected = idProfile;
+            this.dialogDisableProfile = true;
+        },
+        enableItem(idProfile){
+            this.editProfileSelected = idProfile;
+            this.dialogEnableProfile = true;
+        },
     },
     components:{
         Boton,
@@ -455,7 +431,3 @@ export default {
     }
 }
 </script>
-
-<style>
-
-</style>

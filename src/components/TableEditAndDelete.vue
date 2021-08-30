@@ -64,9 +64,6 @@
         val || this.closeDelete()
       },
     },
-    // created () {
-    //   this.initialize()
-    // },
     methods:{
       optionActiveDesactive: function ({status}){
         return (status) ? this.deleteItemIcon : this.enableItemIcon;
@@ -82,9 +79,6 @@
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
         })
-      },
-      mostrar(){
-        alert("asdf");
       }
     },
     props: {
