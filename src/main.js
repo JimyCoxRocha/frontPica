@@ -13,6 +13,7 @@ Vue.component('apexchart', VueApexCharts)
 Vue.config.productionTip = false
 Vue.use(VueAxios, axios);
 
+
 var token = localStorage.getItem('token');
 if(token)
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;

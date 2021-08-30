@@ -6,7 +6,7 @@
         :active="loading"
     >
     </v-progress-linear>
-    <p v-show="loading">Cargando los datos...</p>
+    <slot name="msgLoading"></slot>
     <div class="ma-0 mb-5 pa-0 error white--text" v-show="errorDetected" >
     <p>Ha ocurrido el/los siguiente/s error/es:</p>
     <p v-for="(message, index) in messagesErrorDetected" v-bind:key="index">

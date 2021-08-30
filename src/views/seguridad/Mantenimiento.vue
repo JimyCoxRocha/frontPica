@@ -15,12 +15,18 @@
                 md="1">
                 <Boton :btnData="btnAgregar" :click="clickAgregar"/>
             </v-col>
-            
+            <v-btn dark color="red" class="mt-6" @click="showMessage">Click Me</v-btn>
+
+
             <ChargeData 
                 :errorDetected = "errorDetected"
                 :loading = "loading"
                 :messagesErrorDetected = "messagesErrorDetected"
-            />
+            >
+                    <template slot="msgLoading">
+                            <p v-show="loading">Guardando los datos...</p>
+                    </template>
+            </ChargeData>
             <TableEditAndDelete 
                 :items="profiles" 
                 :headers="headers" 
@@ -46,6 +52,17 @@
                         <v-alert
                             type="info"
                         > Debe realizar algún cambio </v-alert>
+                    </v-container>
+                    <v-container>
+                        <ChargeData 
+                            :errorDetected = "errorDetected"
+                            :loading = "loadingSaveData"
+                            :messagesErrorDetected = "messagesErrorDetected"
+                        >
+                            <template slot="msgLoading">
+                                <p v-show="loadingSaveData">Guardando los datos...</p>
+                            </template>
+                        </ChargeData>
                     </v-container>
                     <v-card-text>
                         <v-container>
@@ -277,6 +294,7 @@ export default {
         tipoOpcion: "Mantenimiento de perfil",
         btnAgregar,
         loading: true,
+        loadingSaveData: false,
         messagesErrorDetected: [],
         errorDetected: false,
         dialogEdit: false,
@@ -287,6 +305,7 @@ export default {
         showAlertInfo: false,
         nameProfile: "",
         descriptionProfile: "",
+        interactivities: [],
         selected: [],
         profiles: [],
         moduleItems: [],
@@ -300,6 +319,12 @@ export default {
         ],
     }),
     methods:{
+        showMessage() {
+            console.log("Exce");
+                this.messages.push("sadfsf");
+            this.interactivities.push("fsafaf");
+        // Use sweetalert2
+        },
         async getProfiles(){
             this.loading = true;
             this.profiles = await findProfiles()
@@ -366,6 +391,7 @@ export default {
                 const profileInOptionUpdates = createProfilesInOptionsUpdates(
                     this.selected, this.moduleItems, 
                     this.editProfileSelected, this.user=findLocalStorage('user'));
+                this.loadingSaveData = true;
                 await updateProfileInOption(profileInOptionUpdates)
                     .then((resp)=>{
                         console.log(resp.data);
@@ -408,6 +434,7 @@ export default {
             this.dialogAddProfile = false;
             this.dialogEdit = false;
             this.showAlertInfo = false;
+            this.loadingSaveData = false;
         },
         clickAgregar(){
             this.dialogAddProfile = true;
