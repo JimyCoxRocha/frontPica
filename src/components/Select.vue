@@ -16,17 +16,7 @@
             cols="7"
             md="8"
             >
-            <v-autocomplete
-                :items="opciones" 
-                v-model="inputSelected.key"
-                item-value="key" 
-                item-text="name"
-                outlined
-                rounded
-                dense
-                hide-details
-                @change="capturarSeleccion(inputSelected.key)"
-            ></v-autocomplete>
+            <slot></slot>
             </v-col>
         </v-row>
     </v-col>
@@ -35,27 +25,18 @@
 <script>
 export default {
     name:"Select",
-    created(){
-        this.inputSelected.key = this.inputKeyDefecto;
-        this.opciones = this.opcionesDisponibles;
+    updated(){
+        this.inputSelected = "";
     },
     data: ()=>({
-        inputSelected: {
-            key: "",
-        },
-        opciones: [
-          {
-            key: "",
-            name: ""
-          }
-        ],
+        inputSelected: ""
     }),
     props: {
         texto: {
             type: String,
             require: true
         },
-        capturarSeleccion: {
+/*         capturarSeleccion: {
             type: Function,
             require: true
         },
@@ -66,7 +47,7 @@ export default {
         inputKeyDefecto: {
             type: String,
             require: true
-        },
+        }, */
     }
 }
 </script>

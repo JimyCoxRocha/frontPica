@@ -100,7 +100,7 @@
                     :items="dataSolicitada" 
                     :obtenerSelecion="obtenerSelecion" 
                     :headers="headers" 
-                    itemKey="dateOutput"
+                    itemKey="_id"
                     :columnEdit="false"/>
             </div>
         </div>
@@ -113,8 +113,10 @@ import DatePicker from '../../components/DatePicker.vue';
 import Boton from '../../components/Boton.vue';
 import TableSelectLog from "../../components/TableSelectLog.vue";
 import { btnBuscar, btnDelete } from "../../types/btnDesign.js";
-import { findReports } from '../../services/DataServices';
+import { findLogsToDelete, deleteLogs } from '../../services/DataServices';
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
+import { formatterLogsDelete } from '../../helpers/setterData.js';
+ 
 
 export default {
     name: "EliminarLog",
@@ -133,16 +135,14 @@ export default {
         selected: [],
         headers: [
           {
-            text: 'Path categoría',
+            text: 'ID',
             align: 'start',
             sortable: false,
-            value: 'pathController',
+            value: '_id',
           },
-          { text: 'Path endpoint', value: 'pathEndpoint' },
-          { text: 'Endpoint', value: 'endpoint' },
-          { text: 'Fecha', value: 'dateOutput' },
-        //   { text: 'Input', value: 'dataInput' },
-        //   { text: 'Output', value: 'dataOutput' },
+          { text: 'Path endpoint', value: 'pathEndPoint' },
+          { text: 'Path categoría', value: 'pathController' },
+          { text: 'Fecha', value: 'date' }
         ],
     }),
     components:{
@@ -152,18 +152,17 @@ export default {
     },
     methods:{
         async clickBuscar(){
-            consultaReporte.fecha_desde = this.valorFechaDesde;
-            consultaReporte.fecha_hasta = this.valorFechaHasta;
             this.loading = true;
-            this.dataSolicitada = await findReports("all",consultaReporte)
-            .then((data)=>{
-              if(data != [{}] && data != null){
-                this.btnDisabled = false;
-              }
-              return data.data;
+            this.dataSolicitada = await findLogsToDelete(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
+            .then(({data})=>{
+            return data;
             })
-            .catch(err => {
-              console.log(err);
+            .catch(error => {
+                if(!error.response.data.messages)
+                throw "No se ha podido acceder al endpoint";
+                else{
+                throw error.response.data.messages[0];
+                }
             });
             this.loading = false;
         },
@@ -175,6 +174,20 @@ export default {
         },
         async clickEliminar(){
             this.dialog = false;
+           
+            await deleteLogs(formatterLogsDelete(this.selected))
+            .then(({data})=>{
+                console.log(data);
+                return data;
+            })
+            .catch(error => {
+                if(!error.response.data.messages)
+                throw "No se ha podido acceder al endpoint";
+                else{
+                throw error.response.data.messages[0];
+                }
+            });
+             this.selected = [];
             console.log("ELIMINADO");
         },
         obtenerSelecion(elementos){

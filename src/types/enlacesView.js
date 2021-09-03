@@ -2,12 +2,12 @@
 export const enlacesView = [
     {
         view: "LogAuditoria.vue",
-        nameEsperado: "Reporte Logs Auditoria",
+        nameEsperado: "Reporte de Logs Auditoria",
         route: "/logAuditoria"
     },
     {
         view: "LogError.vue",
-        nameEsperado: "Reporte Logs Error",
+        nameEsperado: "Reporte de Logs Error",
         route: "/logError"
     },
     {

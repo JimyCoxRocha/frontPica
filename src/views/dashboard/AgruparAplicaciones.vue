@@ -29,34 +29,46 @@
                             class="mt-0 pa-0 mb-9"
                             md="2"
                         >
-                            <Boton :btnData="btnBuscar" :click="clickBuscar"/>
+                            <Boton :btnData="btnBuscar" :click="clickBuscar" :isDisabled="loading"/>
                         </v-col>
                     </v-row>
                 </div>
-                <v-card-text class="d-flex justify-center">
+                <ChargeData 
+                    :errorDetected = "errorDetected"
+                    :loading = "loading"
+                    :messagesErrorDetected = "messagesErrorDetected"
+                >
+                    <template slot="msgLoading">
+                            <p v-show="loading">Cargando los datos...</p>
+                    </template>
+                </ChargeData>
+                <v-card-text class="d-flex justify-center" v-if="!loading || errorDetected">
                     <div id="chart3">
                         <apexchart type="pie" width="400" :options="chartOptionsPie" :series="seriesPie"></apexchart>
                     </div>
                 </v-card-text>
-                
-                <v-progress-linear
-                    indeterminate
-                    color="primary"
-                    :active="loading"
-                >
-                </v-progress-linear>
-                    <p v-show="loading">Cargando los datos...</p>
+                </div>
+                    <ChargeData 
+                        :errorDetected = "errorBarDetected"
+                        :loading = "loadingDataBar"
+                        :messagesErrorDetected = "messagesErrorDetected"
+                    >
+                        <template slot="msgLoading">
+                                <p v-show="loadingDataBar">Cargando gráfico de barras por servicio...</p>
+                        </template>
+                    </ChargeData>
+                    <div id="chart" v-show="showMoreDetailsChart">
+                        <apexchart type="bar" height="350" :options="chartOptionsBar" :series="seriesBar"></apexchart>
+                    </div>
+                    <v-col
+                        class="mt-0 pa-0 mb-9"
+                        md="2"
+                        v-show="showMoreDetailsChart"
+                    >
+                        <Boton :btnData="btnCerrar" :click="clickCerrar"/>
+                    </v-col>
+                <div>
             </div>
-            <div id="chart" v-show="showMoreDetailsChart">
-                <apexchart type="bar" height="350" :options="chartOptionsBar" :series="seriesBar"></apexchart>
-            </div>
-            <v-col
-                class="mt-0 pa-0 mb-9"
-                md="2"
-                v-show="showMoreDetailsChart"
-            >
-                <Boton :btnData="btnCerrar" :click="clickCerrar"/>
-            </v-col>
         </div>
     </v-container>
 </template>
@@ -66,10 +78,14 @@ import moment from 'moment';
 import DatePicker from '../../components/DatePicker.vue';
 import { btnBuscar, btnCerrar } from "../../types/btnDesign.js";
 import Boton from '../../components/Boton.vue';
-import { fomatearSeriesPie, formatearSeriesBar, obtenerPathsEndpoints } from "../../helpers/formatearDataChart.js";
+import ChargeData from '../../components/ChargeData.vue';
 
-const LOGS_AUDITORIA = 1;
-const LOGS_ERROR = 0;
+import { formatterSeriesBar } from "../../helpers/setterData.js";
+import { findStadisticPie, findStadisticByEndpoint } from "../../services/DataServices.js";
+import { consultaReporte } from '../../types/objetoConsultaReporte.js';
+
+/* const LOGS_AUDITORIA = 1;
+const LOGS_ERROR = 0; */
 
 const configResponsiveChart = {
     breakpoint: 480,
@@ -118,18 +134,24 @@ export default {
     data: () => ({
         tipoReporte: "Agrupado por Aplicaciones",
         seriesPie: [ [44] ],
-        seriesBar: [ {data: [6,6]} ],
+        seriesBar: [ {name: "", data: [6,6]} ],
         btnBuscar,
         btnCerrar,
         fechaActual: moment(Date.now()).format('YYYY-MM-DD'),
         valorFechaDesde: moment(Date.now()).subtract(1, 'day').format('YYYY-MM-DD'),
         valorFechaHasta: moment(Date.now()).format('YYYY-MM-DD'),
         loading: false,
-        showMoreDetailsChart: false
+        loadingDataBar: false,
+        showMoreDetailsChart: false,
+        errorBarDetected: false,
+        errorDetected: false,
+        messagesErrorDetected: [""],
+        servicesBar: []
     }),
     components:{
         DatePicker,
         Boton,
+        ChargeData
     },
     computed:{
         chartOptionsPie: function() {
@@ -139,6 +161,7 @@ export default {
                     type: 'pie',
                     events: {
                         dataPointSelection: (event, chartConte, config) => {
+                            /* this.obtenerPathsEndpoints(); */
                             this.cargarDatosDetalleBar(config.dataPointIndex);
                         }
                     }
@@ -159,7 +182,7 @@ export default {
                     height: 350,
                     type: 'bar',
                 },
-                labels: obtenerPathsEndpoints(),
+                labels: this.servicesBar,
                 colors: ["#2A6CAD", "#F27036"],
                 dataLabels: dataLabelChart,
                 legend: {
@@ -170,10 +193,47 @@ export default {
         },
     },
     methods:{
+         async cargarDatosDetalleBar (index) {
+             const indexReport = ["auditory", "error"];
+            if(indexReport[index] === this.seriesBar[0].name){
+                this.clickCerrar();
+                return;
+            }
+             this.loadingDataBar = true;
+             this.showMoreDetailsChart = false;
+            try{
+
+                let {data} = await findStadisticByEndpoint(indexReport[index] ,consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
+                    .then((data)=>{
+                        return data;
+                    })
+                    .catch(error => {
+                        this.errorBarDetected = true;
+                        if(!error.response.data.messages)
+                            this.messagesErrorDetected = ["No se ha podido acceder al endpoint"];
+                        else{
+                            this.messagesErrorDetected = error.response.data.messages;
+                            }
+                            
+                    });
+            
+                let aux = formatterSeriesBar(data);
+                this.servicesBar = aux.keys;
+                this.seriesBar = aux.count;
+                console.log(this.seriesBar);
+                this.showMoreDetailsChart = true;
+            }catch(err){
+                this.showMoreDetailsChart = false;
+            }
+            this.loadingDataBar = false;
+        },
         async clickBuscar(){
-            this.loading = !this.loading;
+            this.clickCerrar();
+            this.loading = true;
+            this.seriesPie = this.obtenerDataPie();
         },
         clickCerrar(){
+            this.seriesBar = [ {name: "", data: [6,6]} ];
             this.showMoreDetailsChart = false;
         },
         capturarFechaDesde(fecha){
@@ -182,44 +242,38 @@ export default {
         capturarFechaHasta(fecha){
             this.valorFechaHasta = fecha;
         },
-        cargarDatosDetalleBar: function(index) {
-            if(index == LOGS_AUDITORIA){
-                console.log("valor AUDITORIA: "+index);
-                this.seriesBar = this.obtenerDataBar("AUDITORIA");//Datos auditoria
-                console.log(this.seriesPie);
-                this.showMoreDetailsChart = true;
-            }else if(index == LOGS_ERROR){
-                console.log("valor ERROR: "+index);
-                this.seriesBar = this.obtenerDataBar("ERROR");//Datos Error
-                console.log(this.seriesBar);
-                this.showMoreDetailsChart = true;
-            }
-        },
         async obtenerDataPie(){
-            this.seriesPie = fomatearSeriesPie();
-            /* await findAllLogDebug(consultaReporte)
-                .then((data)=>{
-                if(data != [{}] && data != null){
-                    this.btnDisabled = false;
-                }
-                return data;
-                })
-                .catch(err => {
-                console.log(err);
-                }); */
+            this.loading = true;
+            this.seriesPie = await findStadisticPie(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
+              .then(({data})=>{
+                  return [data.logAuditory, data.logError];
+              })
+              .catch(error => {
+                  this.errorDetected = true;
+                  if(!error.response.data.messages)
+                      this.messagesErrorDetected = ["No se ha podido acceder al endpoint"];
+                  else{
+                    this.messagesErrorDetected = error.response.data.messages;
+                    }
+                    
+              });
+            
+            this.loading = false;
         },
-        obtenerDataBar(reporte){
-            return formatearSeriesBar(reporte);
-            /* await findAllLogDebug(consultaReporte)
-                .then((data)=>{
-                if(data != [{}] && data != null){
-                    this.btnDisabled = false;
-                }
-                return data;
-                })
-                .catch(err => {
-                console.log(err);
-                }); */
+        async obtenerDataBar(){
+            return await findStadisticPie(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
+              .then(({data})=>{
+                  return [data.logAuditory, data.logError];
+              })
+              .catch(error => {
+                  this.errorDetected = true;
+                  if(!error.response.data.messages)
+                      this.messagesErrorDetected = ["No se ha podido acceder al endpoint"];
+                  else{
+                    this.messagesErrorDetected = error.response.data.messages;
+                    }
+                    
+              });
         }
     }
 }

@@ -1,11 +1,6 @@
 <template>
   <div>
         <AppBar :handleNavBar="handleMenu"/>
-        <!-- <NavBar :sidebarMenu="sidebarMenu" 
-                :handleNavBar="handleMenu"
-                :menuData="menuData" 
-                :initialValueDisplayLgAndUp="initialValueDisplayLgAndUp"
-                :initialValueDisplayMdAndDown="initialValueDisplayMdAndDown"/> -->
         <v-navigation-drawer 
         v-model="sidebarMenu"
         app
@@ -29,7 +24,7 @@
                     v-for="(menuItem,i) in menuData"
                     :key="i" class="pa-0 secondary">
                     <PanelOption 
-                        :nameModule="menuItem.module" 
+                        :nameModule="menuItem.name" 
                         :icon="menuItem.icon" 
                         :options="menuItem.items" />
                 </v-list-item>

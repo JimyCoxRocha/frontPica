@@ -1,8 +1,8 @@
 //Contiene el formato del objeto reporte
-export let consultaReporte = {
-        fecha_desde: "",
-        fecha_hasta: "",
-        servicio: "",
-        categoria: "",
-        modulo: "pos-pica",
+export const consultaReporte = function (fechaDesde, fechaHasta){
+    let consultaReporte = {
+        fechaDesde: fechaDesde,
+        fechaHasta: fechaHasta
     }
+    return consultaReporte;
+}

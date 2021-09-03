@@ -86,8 +86,8 @@ import { login } from "../services/DataServices.js";
       }),
       methods:{
          async iniciarSesion(){
-          var payload = {
-            user: this.user,
+          let payload = {
+            username: this.user,
             password: this.password
           }
           if (this.user.trim() === "" || this.password.trim() === ""){
@@ -96,7 +96,20 @@ import { login } from "../services/DataServices.js";
               return;
           }
           login(payload)
-          .then((data="") =>{
+            .then(()=>{
+                this.errorDetected = false;
+                this.$router.push('/home');
+            })
+            .catch(error => {
+                if(!error.response.data.messages)
+                    console.log("No se ha podido acceder al endpoint");
+                else{
+                  this.errorDetected = true;
+                  this.messageErrorDetected = error.response.data.messages[0];
+                  }
+            });
+
+          /* .then((data="") =>{
             console.log(data);
               if(data !== ""){
                 this.errorDetected = true;
@@ -106,11 +119,9 @@ import { login } from "../services/DataServices.js";
                 this.$router.push('/home');
               }
 
-            })
-          /* .catch( error =>{
-            this.errorDetected = true;
-            console.error(error);
-          }); */
+            }) */
+
+            
         }
       },
       components: {

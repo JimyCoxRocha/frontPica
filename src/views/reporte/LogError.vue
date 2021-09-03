@@ -35,22 +35,47 @@
                 :fechaMax="fechaActual"/>
 
               <Select 
-                texto="Modulo:" 
-                :capturarSeleccion="capturarModulo" 
-                :opcionesDisponibles="modulos"
-                :inputKeyDefecto="inputSelected.keyModulo"/>
+                texto="Modulo:">
+                  <v-autocomplete
+                    :items="modulos" 
+                    v-model="inputSelected.keyModulo"
+                    item-value="key" 
+                    item-text="name"
+                    outlined
+                    rounded
+                    dense
+                    hide-details
+                ></v-autocomplete>
+                </Select>
+
 
               <Select 
-                texto="Categoría:" 
-                :capturarSeleccion="capturarCategoria" 
-                :opcionesDisponibles="categorias"
-                :inputKeyDefecto="inputSelected.keyCategoria"/>
-
+                  texto="Servicio:">
+                    <v-autocomplete
+                    :items="servicios" 
+                    v-model="inputSelected.keyService"
+                    item-value="key" 
+                    item-text="name"
+                    outlined
+                    rounded
+                    dense
+                    hide-details
+                    @change="serviceSelected()"
+                ></v-autocomplete> 
+              </Select>
               <Select 
-                  texto="Servicio:" 
-                  :capturarSeleccion="capturarServicio" 
-                  :opcionesDisponibles="servicios"
-                  :inputKeyDefecto="inputSelected.keyService"/>
+                texto="Endpoint:"> 
+                <v-autocomplete
+                    :items="categorias" 
+                    v-model="inputSelected.keyCategoria"
+                    item-value="key" 
+                    item-text="name"
+                    outlined
+                    rounded
+                    dense
+                    hide-details
+                ></v-autocomplete>  
+              </Select>
               <v-col
                 class="mt-0 pa-0 mb-9"
                 md="2">
@@ -100,15 +125,13 @@
   import moment from 'moment';
   import Boton from '../../components/Boton.vue';
   import TableReporte from '../../components/TableReporte.vue';
-  import { findReports, findCataloguesOptions } from '../../services/DataServices';
+  import { findReports, findCataloguesOptions, findCataloguesEndPoints } from '../../services/DataServices';
   import { consultaReporte } from '../../types/objetoConsultaReporte.js';
   import { convertToPdf } from "../../helpers/convertToPdf.js";
+  import { itemQueryReport, findObjectToReport } from "../../helpers/setterData";
   import { convertToExcel } from "../../helpers/convertToExcel.js";
   import { btnBuscar, exportarPDF, exportarExcel } from "../../types/btnDesign.js";
-  
-  const CATEGORIAS= "category";
-  const SERVICIOS= "service";
-  const MODULOS= "module";
+
 
   export default {
       name: "LogError",
@@ -123,13 +146,13 @@
         errorDetected: false,
         messageErrorDetected: "",
         inputSelected: {
-            keyModulo: "pica",
+            keyModulo: "pos-pica",
             keyCategoria: "all",
             keyService: "all",
         },
         modulos: [
           {
-            key: "pica",
+            key: "pos-pica",
             name: "Proyectos"
           }
         ],
@@ -137,24 +160,12 @@
           {
             key: "all",
             name: "Todos"
-          },
-          {
-            key: "cliente",
-            name: "Cliente"
-          },
-          {
-            key: "cliente",
-            name: "Cliente"
           }
         ],
         servicios: [
           {
             key: "all",
             name: "Todos"
-          },
-          {
-            key: "catalogue",
-            name: "Catálogo"
           }
         ],
         btnBuscar,
@@ -180,15 +191,16 @@
             this.messageErrorDetected = "";
 
             try{
-              this.modulos = await this.cargarCatalogo(MODULOS);
-              this.inputSelected['keyModulo'] = this.modulos[0];
+              this.modulos = await this.cargarCatalogo("modules");
+              this.inputSelected.keyModulo = this.modulos[0].key;
 
-              this.servicios = await this.cargarCatalogo(SERVICIOS);
-              this.inputSelected['keyService'] = this.servicios[0];
-
-              this.categorias = await this.cargarCatalogo(CATEGORIAS);
-              this.inputSelected['keyService'] = this.categorias[0];
+              this.servicios = await this.cargarCatalogo("services/pos-pica");
+              this.inputSelected.keyService = this.servicios[0].key;
+              this.categorias = await this.cargarEndpoints(this.servicios[0].key);
               
+              this.inputSelected.keyCategoria = this.categorias[0].key;
+              
+
               this.loadingCatalogue= false;
               this.dataInitialLoaded = true;
             }catch(err){
@@ -201,46 +213,56 @@
           async cargarCatalogo(tipoCatalogo){
             //Llenamos los módulos
             return await findCataloguesOptions(tipoCatalogo)
-            .then((data)=>{
-              if(data.data.length > 0 && data.status < 400){
-                return data.data;
-              }else if(data.status > 400){
-                throw `Carga de ${tipoCatalogo}: `+ JSON.stringify(data.data);
-              }else{
-                return [];
-              }
+            .then(({data})=>{
+                return data;
             })
-            .catch(err => {
-              throw err;
+            .catch(error => {
+                if(!error.response.data.messages)
+                    console.log("No se ha podido acceder al endpoint");
+                else{
+                  throw `Carga de ${tipoCatalogo}: `+ error.response.data.messages[0];
+                  }
+            });
+          },
+          async cargarEndpoints(service){
+            //Llenamos los módulos
+            return await findCataloguesEndPoints(service)
+            .then(({data})=>{
+                return data;
+            })
+            .catch(error => {
+                if(!error.response.data.messages)
+                    console.log("No se ha podido acceder al endpoint");
+                else{
+                  throw `Carga de ${service}: `+ error.response.data.messages[0];
+                  }
             });
           },
           async clickBuscar(){
             this.errorDetected = false;
             this.messageErrorDetected = "";
-            consultaReporte.fecha_desde = this.valorFechaDesde;
-            consultaReporte.fecha_hasta = this.valorFechaHasta;
-            consultaReporte.categoria = this.inputSelected.keyCategoria;
-            consultaReporte.servicio = this.inputSelected.keyService;
-            this.loading = true;
-            this.dataSolicitada = await findReports("logError", consultaReporte)
-            .then((data)=>{
-              if(data.data.length > 0 && data.status < 400){
-                this.btnDisabled = false;
-                this.errorDetected = false;
-                this.messageErrorDetected = "";
-                return data.data;
-              }else if(data.status > 400){
-                this.btnDisabled = true;
-                this.errorDetected = true;
-                this.messageErrorDetected = data.data;
-                return [];
-              }else{
-                return [];
-              }
-            })
-            .catch(err => {
-              console.log(err);
-            });
+            let consulta = consultaReporte(this.valorFechaDesde, this.valorFechaHasta);
+            
+              consulta["items"] = itemQueryReport(
+                findObjectToReport(this.modulos, this.inputSelected.keyModulo),
+                findObjectToReport(this.servicios, this.inputSelected.keyService),
+                findObjectToReport(this.categorias, this.inputSelected.keyCategoria));
+                this.loading = true;
+              this.dataSolicitada = await findReports("error", consulta)
+              .then(({data})=>{
+                return data;
+              })
+              .catch(error => {
+                  if(!error.response.data.messages)
+                      throw "No se ha podido acceder al endpoint";
+                  else{
+                    throw error.response.data.messages[0];
+                    }
+              });
+
+            if(this.dataSolicitada.length !== 0 )
+              this.btnDisabled =false;
+            else this.btnDisabled = true;
             this.loading = false;
           },
           capturarFechaDesde(fecha){
@@ -249,14 +271,9 @@
           capturarFechaHasta(fecha){
             this.valorFechaHasta = fecha;
           },
-          capturarModulo(key){
-            this.inputSelected.keyModulo = key;
-          },
-          capturarServicio(key){
-            this.inputSelected.keyService = key;
-          },
-          capturarCategoria(key){
-            this.inputSelected.keyCategoria = key;
+          async serviceSelected(){
+            this.categorias = await this.cargarEndpoints(this.inputSelected.keyService);
+            this.inputSelected.keyCategoria = this.categorias[0].key;
           },
           savePDF(){
             convertToPdf(this.dataSolicitada, this.tipoReporte);
@@ -265,7 +282,6 @@
             convertToExcel(this.dataSolicitada, this.tipoReporte);
           }
       }
-
   }
 </script>
 

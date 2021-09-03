@@ -6,10 +6,10 @@
         class="elevation-1"
     >
     <template v-slot:[`item.dataInput`]="{ item }">
-      {{ item }}
+      {{ item.dataInput }}
     </template>
     <template v-slot:[`item.dataOutput`]="{ item }">
-      {{ item }}
+      {{ item.dataOutput }}
     </template>
   </v-data-table>
 </template>
@@ -27,8 +27,8 @@ export default {
             value: 'pathController',
           },
           { text: 'Path endpoint', value: 'pathEndpoint' },
-          { text: 'Endpoint', value: 'endpoint' },
-          { text: 'Fecha', value: 'dateOutput' },
+          { text: 'Endpoint', value: 'pathController' },
+          { text: 'Fecha', value: 'date' },
           { text: 'Input', value: 'dataInput' },
           { text: 'Output', value: 'dataOutput' },
         ],
