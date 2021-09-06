@@ -117,8 +117,8 @@ export const formatterLogsDelete = (logs) => {
 
 export const setterErrorData = (msg) => {
     try{
-        return  msg.response?.data?.messages;
+        return  msg.response.data.messages;
     }catch(err){
-        return ["Ha ocurrido un error."];
+        return ["Error en la comunicación con el servicio."];
     }
 }

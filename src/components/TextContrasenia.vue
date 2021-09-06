@@ -8,8 +8,9 @@
     dense
     filled
     autocomplete="off"
+
     :type="showPass ? 'text' : 'password'"
-    @change="obtenerContrasenia(password)"
+    v-on:input="$emit('input', password)"
     ></v-text-field>
 </template>
 
@@ -21,13 +22,12 @@ export default {
         showPass: false,
     }),
     props:{
-        obtenerContrasenia: {
-            type: Function,
-            require: true
-        },
         label: {
             type: String,
             require: true
+        },
+        value: {
+            type: String
         }
     }
 }

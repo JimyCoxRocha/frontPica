@@ -96,6 +96,13 @@ export const peticionPostman = async function(objPostman){
   return objetoResp;
 }
 
+export const saveUser = async function(data){
+  return await axios.post(`${urlMdw}/securitys`, data)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
 export const findProfiles = async function(){
   return await axios.get(`${urlMdw}/ge-profiles/perfil`)
   .then(resp =>{

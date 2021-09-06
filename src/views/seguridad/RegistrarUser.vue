@@ -10,6 +10,15 @@
                 <v-toolbar-title>{{tipoOpcion}}</v-toolbar-title>
             </v-toolbar>
             <div class="mt-10 mr-4 ml-4 mb-10">
+                <ChargeData 
+                    :errorDetected = "errorDetected"
+                    :loading = "loading"
+                    :messagesErrorDetected = "messagesErrorDetected"
+                >
+                        <template slot="msgLoading">
+                                <p v-show="loading">{{loadingMessage}}</p>
+                        </template>
+                </ChargeData>
                 <v-col
                     cols = "12">
                     <v-row>
@@ -22,7 +31,7 @@
                                 cols="3"
                                 md="2"
                                 >
-                                    <p class="text-right ma-0 mt-2">Usuario:</p>
+                                    <p class="text-right ma-0 mt-2">Nombre:</p>
                                 </v-col>
 
                                 <v-col
@@ -32,7 +41,57 @@
                                 >
                                     <v-text-field
                                         v-model="name"
-                                        label="usuario"
+                                        label="Nombre"
+                                        outlined
+                                        hide-details
+                                        dense
+                                        autocomplete="off"
+                                    ></v-text-field>
+
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col
+                                class="pr-0"
+                                cols="3"
+                                md="2"
+                                >
+                                    <p class="text-right ma-0 mt-2">Apellido:</p>
+                                </v-col>
+
+                                <v-col
+                                class=""
+                                cols="9"
+                                md="10"
+                                >
+                                    <v-text-field
+                                        v-model="lastName"
+                                        label="Apellido"
+                                        outlined
+                                        hide-details
+                                        dense
+                                        autocomplete="off"
+                                    ></v-text-field>
+
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col
+                                class="pr-0"
+                                cols="3"
+                                md="2"
+                                >
+                                    <p class="text-right ma-0 mt-2">Username:</p>
+                                </v-col>
+
+                                <v-col
+                                class=""
+                                cols="9"
+                                md="10"
+                                >
+                                    <v-text-field
+                                        v-model="user"
+                                        label="Username"
                                         outlined
                                         hide-details
                                         dense
@@ -55,10 +114,18 @@
                                 cols="8"
                                 md="10"
                                 >
-                                    <TextContrasenia 
-                                        label="Contraseña"
-                                        :obtenerContrasenia="obtenerContrasenia1"
-                                    />
+                                    <v-text-field
+                                        v-model="contrasenia1"
+                                        :append-icon="showPass1 ? 'mdi-eye' : 'mdi-eye-off'"
+                                        @click:append="showPass1 = !showPass1"
+                                        required
+                                        outlined
+                                        dense
+                                        filled
+                                        label="Escribir contraseña"
+                                        autocomplete="off"
+                                        :type="showPass1 ? 'text' : 'password'"
+                                    ></v-text-field>
                                 </v-col>
                             </v-row>
                             <v-row>
@@ -75,10 +142,18 @@
                                 cols="8"
                                 md="10"
                                 >
-                                    <TextContrasenia 
+                                <v-text-field
+                                        v-model="contrasenia2"
+                                        :append-icon="showPass2 ? 'mdi-eye' : 'mdi-eye-off'"
+                                        @click:append="showPass2 = !showPass2"
+                                        required
+                                        outlined
+                                        dense
+                                        filled
+                                        autocomplete="off"
                                         label="Confirmar contraseña"
-                                        :obtenerContrasenia="obtenerContrasenia2"
-                                    />
+                                        :type="showPass2 ? 'text' : 'password'"
+                                    ></v-text-field>
                                 </v-col>
                             </v-row>
                         </v-col>
@@ -121,18 +196,31 @@
 </template>
 
 <script>
-import TextContrasenia from "../../components/TextContrasenia.vue";
 import Boton from "../../components/Boton.vue";
 import { btnGuardar } from "../../types/btnDesign.js";
+import ChargeData from "../../components/ChargeData.vue";
+import { saveUser } from "../../services/DataServices";
+import { setterErrorData } from '../../helpers/setterData.js';
 
 export default {
     name: "RegistrarUser",
+    created: () => ({
+
+    }),
     data: () => ({
         tipoOpcion: "Registrar un User",
         name: "",
-        btnGuardar,
+        lastName: "",
+        user: "",
         contrasenia1: "",
         contrasenia2: "",
+        loadingMessage: "",
+        loading: false,
+        errorDetected: false,
+        messagesErrorDetected: [],
+        btnGuardar,
+        showPass1: false,
+        showPass2: false,
         inputSelected:"support",
         privilegios: [
           {
@@ -146,19 +234,48 @@ export default {
         ]
     }),
     methods: {
-        obtenerContrasenia1(contrasenia){
-            this.contrasenia1 = contrasenia;
-        },
-        obtenerContrasenia2(contrasenia){
-            this.contrasenia2 = contrasenia;
-        },
         async clickGuardar(){
-            console.log("Se está enviado");
+            this.errorDetected = false;
+            this.loading = true;
+            this.loadingMessage = "Guardando usuario";
+            try{
+                if(this.contrasenia1.trim() !== this.contrasenia2.trim()){
+                    throw ["Las claves de acceso no coinciden. Por favor, verifique nuevamente"];
+                }else if(this.name.trim().length == 0 || this.user.trim().length == 0 || 
+                         this.lastName.trim().length == 0 || this.contrasenia1.trim().length == 0 ||
+                         this.contrasenia2.trim().length == 0 ){
+                    throw ["Ingrese los valores correctamente"];
+                }
+                await saveUser({
+                    "idProfile": this.inputSelected,
+                    "name": this.name,
+                    "lastName": this.lastName,
+                    "user": this.user,
+                    "password": this.contrasenia1})
+                .then(({data})=>{
+                    return data;
+                })
+                .catch(error => {
+                    throw setterErrorData(error);
+                });
+                this.setterData();
+            }catch(err){
+                this.errorDetected = true;
+                this.messagesErrorDetected = err;
+            }
+            this.loading = false;
+        },
+        setterData(){
+            this.lastName = "";
+            this.name = "";
+            this.user = "";
+            this.contrasenia1 = "";
+            this.contrasenia2 = "";
         }
     },
     components: {
-        TextContrasenia,
-        Boton
+        Boton,
+        ChargeData
     }
 }
 </script>
