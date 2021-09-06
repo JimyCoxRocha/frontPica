@@ -32,9 +32,10 @@
                 </v-col>
                 </v-row>
             </div>
+            <div v-if="showButonDelete">
+
             <v-col
                 class="mt-0 pa-0 mb-1"
-                v-show="showButonDelete"
                 md="2"
                 >
 
@@ -89,6 +90,7 @@
 
                 
             </v-col>
+            </div>
             <ChargeData 
                 :errorDetected = "errorDetected"
                 :loading = "loading"
@@ -105,23 +107,15 @@
                 :messagesErrorDetected = "messagesErrorDetected"
             >
                     <template slot="msgLoading">
-                            <p v-show="loading">Cargando los datos...</p>
+                            <p v-show="loadingDelete">Borrando los/el Log/s...</p>
                     </template>
             </ChargeData>
-
-            <!-- <v-progress-linear
-                indeterminate
-                color="primary"
-                :active="loading"
-            >
-            </v-progress-linear>
-                <p v-show="loading">Cargando los datos...</p> -->
-                <TableSelectLog 
-                    :items="dataSolicitada" 
-                    :obtenerSelecion="obtenerSelecion" 
-                    :headers="headers" 
-                    itemKey="_id"
-                    :columnEdit="false"/>
+            <TableSelectLog 
+                :items="dataSolicitada" 
+                :obtenerSelecion="obtenerSelecion" 
+                :headers="headers" 
+                itemKey="_id"
+                :columnEdit="false"/>
             </div>
         </div>
     </v-container>
@@ -177,6 +171,8 @@ export default {
     },
     methods:{
         async clickBuscar(){
+            this.errorDeleteDetected = false;
+            this.errorDetected = false;
             this.loading = true;
             this.dataSolicitada = await findLogsToDelete(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
             .then(({data})=>{
@@ -195,6 +191,8 @@ export default {
             this.valorFechaHasta = fecha;
         },
         async clickEliminar(){
+            this.errorDeleteDetected = false;
+            this.errorDetected = false;
             this.dialog = false;
            this.loadingDelete = true;
             await deleteLogs(formatterLogsDelete(this.selected))
@@ -207,7 +205,9 @@ export default {
                 this.messagesErrorDetected = setterErrorData(error);
             });
              this.selected = [];
+             
              this.loadingDelete = false;
+             this.showButonDelete = false;
              this.clickBuscar();
         },
         obtenerSelecion(elementos){
