@@ -13,28 +13,28 @@
             <div>
                 <v-row
                 >
-                <DatePicker 
-                    :fechaInicial="valorFechaDesde" 
-                    texto="Fecha Desde:" 
-                    :capturarFecha="capturarFechaDesde"
-                    :fechaMax="valorFechaHasta"/>
+                    <DatePicker 
+                        :fechaInicial="valorFechaDesde" 
+                        texto="Fecha Desde:" 
+                        :capturarFecha="capturarFechaDesde"
+                        :fechaMax="valorFechaHasta"/>
 
-                <DatePicker 
-                    :fechaInicial="valorFechaHasta"  
-                    texto="Fecha Hasta:"
-                    :capturarFecha="capturarFechaHasta"
-                    :fechaMin="valorFechaDesde"
-                    :fechaMax="fechaActual"/>
-                <v-col
-                    class="mt-0 pa-0 mb-9"
-                    md="2">
-                    <Boton :btnData="btnBuscar" :click="clickBuscar"/>
-                </v-col>
+                    <DatePicker 
+                        :fechaInicial="valorFechaHasta"  
+                        texto="Fecha Hasta:"
+                        :capturarFecha="capturarFechaHasta"
+                        :fechaMin="valorFechaDesde"
+                        :fechaMax="fechaActual"/>
+                    <v-col
+                        class="mt-0 pa-0 mb-9"
+                        md="2">
+                        <Boton :btnData="btnBuscar" :click="clickBuscar" :isDisabled="!loading"/>
+                    </v-col>
                 </v-row>
             </div>
             <v-col
                 class="mt-0 pa-0 mb-1"
-                v-show="showButonDelete"
+                v-if="showButonDelete"
                 md="2"
                 >
 
@@ -85,9 +85,6 @@
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
-
-
-                
             </v-col>
             <ChargeData 
                 :errorDetected = "errorDetected"
@@ -95,33 +92,16 @@
                 :messagesErrorDetected = "messagesErrorDetected"
             >
                     <template slot="msgLoading">
-                            <p v-show="loading">Cargando los datos...</p>
+                            <p v-show="loading">{{loadingMessage}}</p>
                     </template>
             </ChargeData>
 
-            <ChargeData 
-                :errorDetected = "errorDeleteDetected"
-                :loading = "loadingDelete"
-                :messagesErrorDetected = "messagesErrorDetected"
-            >
-                    <template slot="msgLoading">
-                            <p v-show="loading">Cargando los datos...</p>
-                    </template>
-            </ChargeData>
-
-            <!-- <v-progress-linear
-                indeterminate
-                color="primary"
-                :active="loading"
-            >
-            </v-progress-linear>
-                <p v-show="loading">Cargando los datos...</p> -->
-                <TableSelectLog 
-                    :items="dataSolicitada" 
-                    :obtenerSelecion="obtenerSelecion" 
-                    :headers="headers" 
-                    itemKey="_id"
-                    :columnEdit="false"/>
+            <TableSelectLog 
+                :items="dataSolicitada" 
+                :obtenerSelecion="obtenerSelecion" 
+                :headers="headers" 
+                itemKey="_id"
+                :columnEdit="false"/>
             </div>
         </div>
     </v-container>
@@ -147,14 +127,14 @@ export default {
         valorFechaDesde: moment(Date.now()).subtract(1, 'day').format('YYYY-MM-DD'),
         valorFechaHasta: moment(Date.now()).format('YYYY-MM-DD'),
         dataSolicitada: [],
+        messagesErrorDetected: [],
         showButonDelete: false,
         btnBuscar,
         btnDelete,
         loading: false,
         btnDisabled: true,
         errorDetected: false,
-        loadingDelete: false,
-        errorDeleteDetected: false,
+        loadingMessage: "",
         dialog: false,
         selected: [],
         headers: [
@@ -169,16 +149,13 @@ export default {
           { text: 'Fecha', value: 'date' }
         ],
     }),
-    components:{
-        DatePicker,
-        Boton,
-        TableSelectLog,
-        ChargeData
-    },
     methods:{
-        async clickBuscar(){
-            this.loading = true;
-            this.dataSolicitada = await findLogsToDelete(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
+        async chargeData(afterDelete){
+            (afterDelete) ? 
+                this.loadingMessage = "Actualizando tabla..." :
+                this.loadingMessage = "Cargando los datos...";
+
+            return await findLogsToDelete(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
             .then(({data})=>{
                 return data;
             })
@@ -186,29 +163,28 @@ export default {
                 this.errorDetected = true;
                 this.messagesErrorDetected = setterErrorData(error);
             });
+        },
+        async clickBuscar(){
+            this.loading = true;
+            this.dataSolicitada = this.chargeData(false);
             this.loading = false;
         },
-        capturarFechaDesde(fecha){
-            this.valorFechaDesde = fecha;
-        },
-        capturarFechaHasta(fecha){
-            this.valorFechaHasta = fecha;
-        },
         async clickEliminar(){
+            this.showButonDelete = false;
             this.dialog = false;
-           this.loadingDelete = true;
+            this.loading = true;
             await deleteLogs(formatterLogsDelete(this.selected))
             .then(({data})=>{
                 console.log(data);
                 return data;
             })
             .catch(error => {
-                this.errorDeleteDetected = true;
+                this.errorDetected = true;
                 this.messagesErrorDetected = setterErrorData(error);
             });
              this.selected = [];
-             this.loadingDelete = false;
-             this.clickBuscar();
+             this.loading = false;
+             this.dataSolicitada = this.chargeData(true);
         },
         obtenerSelecion(elementos){
             this.selected = elementos;
@@ -217,8 +193,21 @@ export default {
             }else{
                 this.showButonDelete = false;
             }
-        }
-    }
+        },
+        capturarFechaDesde(fecha){
+            this.valorFechaDesde = fecha;
+        },
+        capturarFechaHasta(fecha){
+            this.valorFechaHasta = fecha;
+        },
+    },    
+    components:{
+        DatePicker,
+        Boton,
+        TableSelectLog,
+        ChargeData
+    },
+    
 }
 </script>
 
