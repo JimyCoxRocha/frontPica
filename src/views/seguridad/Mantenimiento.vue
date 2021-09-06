@@ -278,7 +278,7 @@ import { btnAgregar } from "../../types/btnDesign.js";
 import Boton from "../../components/Boton.vue";
 import TableEditAndDelete from "../../components/TableEditAndDelete.vue";
 import { findProfiles, findProfileOptions, enableProfile, disableProfile, updateProfileInOption, saveProfile } from '../../services/DataServices';
-import { setterProfilesInOptionsActives, createProfilesInOptionsUpdates } from '../../helpers/setterData';
+import { setterProfilesInOptionsActives, createProfilesInOptionsUpdates, setterErrorData } from '../../helpers/setterData';
 import ChargeData from "../../components/ChargeData.vue";
 import DialogAcceptCancel from "../../components/DialogAcceptCancel.vue";
 import TextFieldSimpleData from "../../components/TextFieldSimpleData.vue";
@@ -337,8 +337,7 @@ export default {
                 })
                 .catch(error => {
                     this.errorDetected = true;
-                    this.messagesErrorDetected = error.response.messages;
-                    return [];
+                    this.messagesErrorDetected = setterErrorData(error);
                 });
                 this.loading = false;
         },
@@ -355,8 +354,8 @@ export default {
                 }
             })
             .catch(error => {
-                console.log(error);
-                return [];
+                this.errorDetected = true;
+                this.messagesErrorDetected = setterErrorData(error);
             });
             this.dialogEdit = true;
         },
@@ -366,10 +365,8 @@ export default {
                 console.log(resp.data);
             })
             .catch(error => {
-                if(!error.response.data.error)
-                        console.log("No se ha podido acceder al endpoint");
-                else
-                    console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
+                this.errorDetected = true;
+                this.messagesErrorDetected = setterErrorData(error);
             });
             this.closeDialog();
         },
@@ -379,10 +376,8 @@ export default {
                 console.log(resp.data);
             })
             .catch(error => {
-                if(!error.response.data.error)
-                        console.log("No se ha podido acceder al endpoint");
-                else
-                    console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
+                this.errorDetected = true;
+                this.messagesErrorDetected = setterErrorData(error);
             });
             this.closeDialog();
         },
@@ -397,10 +392,8 @@ export default {
                         console.log(resp.data);
                     })
                     .catch(error => {
-                        if(!error.response.data.error)
-                            console.log("No se ha podido acceder al endpoint");
-                        else
-                            console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
+                        this.errorDetected = true;
+                        this.messagesErrorDetected = setterErrorData(error);
                     });
                 this.closeDialog();
             } catch (error) {
@@ -418,10 +411,8 @@ export default {
                     console.log(resp.data);
                 })
                 .catch(error => {
-                    if(!error.response.data.error)
-                        console.log("No se ha podido acceder al endpoint");
-                    else
-                        console.log(error.response.data.error);//Acceder a reemplazar .error .messages y mostrar el mensaje
+                    this.errorDetected = true;
+                    this.messagesErrorDetected = setterErrorData(error);
                 });
                 this.closeDialog();
             } catch (error) {

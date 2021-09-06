@@ -1,5 +1,5 @@
 export const fomatearSeriesPie = () => {
-    return [44, 55];
+    return [45, 55];
     
 }
 

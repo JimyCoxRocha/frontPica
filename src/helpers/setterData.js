@@ -114,3 +114,11 @@ export const formatterLogsDelete = (logs) => {
     console.log(formatLogsDelete);
     return formatLogsDelete;
 }
+
+export const setterErrorData = (msg) => {
+    try{
+        return  msg.response?.data?.messages;
+    }catch(err){
+        return ["Ha ocurrido un error."];
+    }
+}

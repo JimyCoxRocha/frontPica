@@ -89,13 +89,33 @@
 
                 
             </v-col>
-            <v-progress-linear
+            <ChargeData 
+                :errorDetected = "errorDetected"
+                :loading = "loading"
+                :messagesErrorDetected = "messagesErrorDetected"
+            >
+                    <template slot="msgLoading">
+                            <p v-show="loading">Cargando los datos...</p>
+                    </template>
+            </ChargeData>
+
+            <ChargeData 
+                :errorDetected = "errorDeleteDetected"
+                :loading = "loadingDelete"
+                :messagesErrorDetected = "messagesErrorDetected"
+            >
+                    <template slot="msgLoading">
+                            <p v-show="loading">Cargando los datos...</p>
+                    </template>
+            </ChargeData>
+
+            <!-- <v-progress-linear
                 indeterminate
                 color="primary"
                 :active="loading"
             >
             </v-progress-linear>
-                <p v-show="loading">Cargando los datos...</p>
+                <p v-show="loading">Cargando los datos...</p> -->
                 <TableSelectLog 
                     :items="dataSolicitada" 
                     :obtenerSelecion="obtenerSelecion" 
@@ -115,7 +135,8 @@ import TableSelectLog from "../../components/TableSelectLog.vue";
 import { btnBuscar, btnDelete } from "../../types/btnDesign.js";
 import { findLogsToDelete, deleteLogs } from '../../services/DataServices';
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
-import { formatterLogsDelete } from '../../helpers/setterData.js';
+import { formatterLogsDelete, setterErrorData } from '../../helpers/setterData.js';
+import ChargeData from "../../components/ChargeData.vue";
  
 
 export default {
@@ -131,6 +152,9 @@ export default {
         btnDelete,
         loading: false,
         btnDisabled: true,
+        errorDetected: false,
+        loadingDelete: false,
+        errorDeleteDetected: false,
         dialog: false,
         selected: [],
         headers: [
@@ -148,21 +172,19 @@ export default {
     components:{
         DatePicker,
         Boton,
-        TableSelectLog
+        TableSelectLog,
+        ChargeData
     },
     methods:{
         async clickBuscar(){
             this.loading = true;
             this.dataSolicitada = await findLogsToDelete(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
             .then(({data})=>{
-            return data;
+                return data;
             })
             .catch(error => {
-                if(!error.response.data.messages)
-                throw "No se ha podido acceder al endpoint";
-                else{
-                throw error.response.data.messages[0];
-                }
+                this.errorDetected = true;
+                this.messagesErrorDetected = setterErrorData(error);
             });
             this.loading = false;
         },
@@ -174,21 +196,19 @@ export default {
         },
         async clickEliminar(){
             this.dialog = false;
-           
+           this.loadingDelete = true;
             await deleteLogs(formatterLogsDelete(this.selected))
             .then(({data})=>{
                 console.log(data);
                 return data;
             })
             .catch(error => {
-                if(!error.response.data.messages)
-                throw "No se ha podido acceder al endpoint";
-                else{
-                throw error.response.data.messages[0];
-                }
+                this.errorDeleteDetected = true;
+                this.messagesErrorDetected = setterErrorData(error);
             });
              this.selected = [];
-            console.log("ELIMINADO");
+             this.loadingDelete = false;
+             this.clickBuscar();
         },
         obtenerSelecion(elementos){
             this.selected = elementos;
