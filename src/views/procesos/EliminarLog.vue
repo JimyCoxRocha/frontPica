@@ -28,18 +28,14 @@
                     <v-col
                         class="mt-0 pa-0 mb-9"
                         md="2">
-                        <Boton :btnData="btnBuscar" :click="clickBuscar" :isDisabled="!loading"/>
+                        <Boton :btnData="btnBuscar" :click="clickBuscar" :isDisabled="loading"/>
                     </v-col>
                 </v-row>
             </div>
-            <div v-if="showButonDelete">
-
+            <div 
+            v-show="showButonDelete">
             <v-col
                 class="mt-0 pa-0 mb-1"
-<<<<<<< HEAD
-=======
-                v-if="showButonDelete"
->>>>>>> 31d4e83967217e614f6af9cdb80aa4dfe8b85238
                 md="2"
                 >
 
@@ -101,25 +97,17 @@
                             <p v-show="loading">{{loadingMessage}}</p>
                     </template>
             </ChargeData>
-
-<<<<<<< HEAD
-            <ChargeData 
-                :errorDetected = "errorDeleteDetected"
-                :loading = "loadingDelete"
-                :messagesErrorDetected = "messagesErrorDetected"
-            >
-                    <template slot="msgLoading">
-                            <p v-show="loadingDelete">Borrando los/el Log/s...</p>
-                    </template>
-            </ChargeData>
-=======
->>>>>>> 31d4e83967217e614f6af9cdb80aa4dfe8b85238
+            <div >
+                
             <TableSelectLog 
+                v-if="!loading"
                 :items="dataSolicitada" 
                 :obtenerSelecion="obtenerSelecion" 
                 :headers="headers" 
                 itemKey="_id"
-                :columnEdit="false"/>
+                :columnEdit="false"
+                />
+            </div>
             </div>
         </div>
     </v-container>
@@ -168,40 +156,32 @@ export default {
         ],
     }),
     methods:{
-<<<<<<< HEAD
-        async clickBuscar(){
-            this.errorDeleteDetected = false;
-            this.errorDetected = false;
-            this.loading = true;
-            this.dataSolicitada = await findLogsToDelete(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
-=======
         async chargeData(afterDelete){
             (afterDelete) ? 
                 this.loadingMessage = "Actualizando tabla..." :
                 this.loadingMessage = "Cargando los datos...";
 
             return await findLogsToDelete(consultaReporte(this.valorFechaDesde, this.valorFechaHasta))
->>>>>>> 31d4e83967217e614f6af9cdb80aa4dfe8b85238
             .then(({data})=>{
+                this.showButonDelete = false;
                 return data;
             })
             .catch(error => {
+                this.showButonDelete = false;
                 this.errorDetected = true;
                 this.messagesErrorDetected = setterErrorData(error);
+                return [];
             });
+            
         },
         async clickBuscar(){
+            this.showButonDelete = false;
             this.loading = true;
-            this.dataSolicitada = this.chargeData(false);
+            this.dataSolicitada = await this.chargeData(false);
             this.loading = false;
         },
         async clickEliminar(){
-<<<<<<< HEAD
-            this.errorDeleteDetected = false;
-            this.errorDetected = false;
-=======
             this.showButonDelete = false;
->>>>>>> 31d4e83967217e614f6af9cdb80aa4dfe8b85238
             this.dialog = false;
             this.loading = true;
             await deleteLogs(formatterLogsDelete(this.selected))
@@ -213,16 +193,9 @@ export default {
                 this.errorDetected = true;
                 this.messagesErrorDetected = setterErrorData(error);
             });
+             this.dataSolicitada = await this.chargeData(true);
              this.selected = [];
-<<<<<<< HEAD
-             
-             this.loadingDelete = false;
-             this.showButonDelete = false;
-             this.clickBuscar();
-=======
              this.loading = false;
-             this.dataSolicitada = this.chargeData(true);
->>>>>>> 31d4e83967217e614f6af9cdb80aa4dfe8b85238
         },
         obtenerSelecion(elementos){
             this.selected = elementos;

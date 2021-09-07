@@ -141,6 +141,7 @@
     import { btnEnviar } from "../../types/btnDesign.js";
     import { peticionPostman } from "../../services/DataServices.js";
     import { generarObjPostman } from "../../types/objetoPostman.js";
+    import { findLocalStorage } from "../../helpers/handleLocalStorage.js";
 
     export default {
         name: "Postman",
@@ -151,7 +152,13 @@
             enlacePeticion: "",
             btnEnviar,
             elementosParams: [],
-            elementosHeaders: [],
+            elementosHeaders: [
+                {
+                    key: 'Authorization',
+                    value: findLocalStorage('token'),
+                    description: 'Token'
+                }
+            ],
             elementActive: "BODY",
             dataJSONEnvio: ``,
             respServidor: "",
@@ -172,7 +179,7 @@
             },
             async enviarPeticion(){
                 //llenamos los datos del objeto para enviar al servicio
-                let objetoPeticionPostman = generarObjPostman;
+                let objetoPeticionPostman = generarObjPostman();
                 objetoPeticionPostman.elementosHeaders = this.elementosHeaders;
                 objetoPeticionPostman.elementosParams = this.elementosParams;
                 objetoPeticionPostman.peticion = this.peticionSelected;
@@ -184,7 +191,6 @@
                         
                     this.showErrorValidation = false;
                     this.errorValidation = "";
-
                     this.respServidor = await peticionPostman(objetoPeticionPostman)
                     .then((data) =>{
                         console.log(data);
