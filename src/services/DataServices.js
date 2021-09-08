@@ -80,6 +80,38 @@ export const saveUser = async function(data){
     return resp.data;
   });
 }
+//********************************************//
+export const findUsers = async function (){
+  return await axios.post(`${urlMdw}/securitys/register`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+export const findUserById = async function (/* idUser */){
+  return await axios.post(`${urlMdw}/securitys/register`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+export const enableUser = async function (/* idUser */){
+  return await axios.post(`${urlMdw}/securitys/register`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+export const disableUserById = async function (/* idUser */){
+  return await axios.post(`${urlMdw}/securitys/register`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+export const updateUser = async function (/* user */){
+  return await axios.post(`${urlMdw}/securitys/register`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+//********************************************//
 
 export const peticionPostman = async function(objPostman){
   const timeBeforeRequest = performance.now();
