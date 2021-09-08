@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
-import { obtenerClaveValorPostman } from '../helpers/obtenerClaveValorPostman.js';
+import { obtenerClaveValorPostman, obtenerClaveValorPostmanHeader } from '../helpers/obtenerClaveValorPostman.js';
 import { generarResponsePostman } from '../helpers/generarResponsePostman.js';
 import { jsonToUrlEncode } from '../helpers/setterData';
 
@@ -11,7 +11,7 @@ export const login = async function(payload) {
   .then(resp => {
     axios.defaults.headers.common['Authorization'] = resp.data.data.token;//Token
     saveLocalStorage('token',resp.data.data.token);
-    saveLocalStorage('user', payload.user);
+    saveLocalStorage('user', payload.username);
     saveLocalStorage('menu', JSON.stringify(resp.data.data.menu));
     return resp
   });
@@ -67,16 +67,30 @@ export const deleteLogs = async function(dataLog){
   });
 }
 
+export const chargeProfiles = async function(){
+  return await axios.get(`${urlMdw}/securitys/profiles`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
+export const saveUser = async function(data){
+  return await axios.post(`${urlMdw}/securitys/register`, data)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
 export const peticionPostman = async function(objPostman){
   const timeBeforeRequest = performance.now();
   let tiempo = 0;
   let objetoResp = null;
-  
   objetoResp = await axios({
     method: objPostman.peticion,
     url: objPostman.url,
-    headers: obtenerClaveValorPostman(objPostman.elementosHeaders),
-    data: {...objPostman.dataJSONEnvio, ...obtenerClaveValorPostman(objPostman.elementosParams)},
+    headers: obtenerClaveValorPostmanHeader(objPostman.elementosHeaders),
+    params: obtenerClaveValorPostman(objPostman.elementosParams),
+    data: {...objPostman.dataJSONEnvio},
   }) 
 
   .then(resp => {
@@ -89,29 +103,35 @@ export const peticionPostman = async function(objPostman){
       if (error.response) {
         let timeAfterRequest = performance.now();
         tiempo = (timeAfterRequest - timeBeforeRequest);
-        console.log(error.response);
         return generarResponsePostman(error.response.data, error.response.status, tiempo, JSON.stringify(error.response).length);
       }
   })
   return objetoResp;
 }
 
-export const saveUser = async function(data){
-  return await axios.post(`${urlMdw}/securitys`, data)
-  .then(resp =>{
-    return resp.data;
-  });
-}
-
 export const findProfiles = async function(){
-  return await axios.get(`${urlMdw}/ge-profiles/perfil`)
+  return await axios.get(`${urlMdw}/securitys/maintance`)
   .then(resp =>{
     return resp.data;
   });
 }
 
 export const findProfileOptions= async function({idProfile}){
-  return await axios.get(`${urlMdw}/profiles-in-options/all?${idProfile}`)
+  return await axios.get(`${urlMdw}/securitys/maintance/profile-in-option/${idProfile}`)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
+export const updateProfileInOption= async function(profileInOptionUpdates){
+  return await axios.post(`${urlMdw}/securitys/maintance/profile-in-option`, profileInOptionUpdates)
+  .then(resp =>{
+    return resp.data;
+  });
+}
+
+export const saveProfile= async function(name, description){
+  return await axios.post(`${urlMdw}/securitys/maintance/profile`, {name, description})
   .then(resp =>{
     return resp.data;
   });
@@ -131,16 +151,3 @@ export const enableProfile= async function({idProfile}){
   });
 }
 
-export const updateProfileInOption= async function(profileInOptionUpdates){
-  return await axios.get(`${urlMdw}/update-profile/update`, profileInOptionUpdates)
-  .then(resp =>{
-    return resp.data;
-  });
-}
-
-export const saveProfile= async function(name, description){
-  return await axios.get(`${urlMdw}/create-profile/create`, {name, description})
-  .then(resp =>{
-    return resp.data;
-  });
-}

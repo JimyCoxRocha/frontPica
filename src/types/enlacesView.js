@@ -27,7 +27,7 @@ export const enlacesView = [
     },
     {
         view: "RegisterUser.vue",
-        nameEsperado: "Registrar un Usuario",
+        nameEsperado: "Registrar Usuario",
         route: "/registrarUser"
     },
     {

@@ -15,7 +15,6 @@
                 md="1">
                 <Boton :btnData="btnAgregar" :click="clickAgregar"/>
             </v-col>
-            <v-btn dark color="red" class="mt-6" @click="showMessage">Click Me</v-btn>
 
 
             <ChargeData 
@@ -319,12 +318,6 @@ export default {
         ],
     }),
     methods:{
-        showMessage() {
-            console.log("Exce");
-                this.messages.push("sadfsf");
-            this.interactivities.push("fsafaf");
-        // Use sweetalert2
-        },
         async getProfiles(){
             this.loading = true;
             this.profiles = await findProfiles()
@@ -396,6 +389,7 @@ export default {
                         this.messagesErrorDetected = setterErrorData(error);
                     });
                 this.closeDialog();
+                this.getProfiles();
             } catch (error) {
                 this.showAlertInfo = true;
                 this.selected = setterProfilesInOptionsActives(this.moduleItems);

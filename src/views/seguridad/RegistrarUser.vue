@@ -159,14 +159,16 @@
                         </v-col>
                         <v-col
                             cols = "12"
-                            md="6">
+                            md="6"
+                            v-if="!loadingProfile"
+                            >
                             <v-row>
                                 <v-col
                                 class="pr-0"
                                 cols="4"
                                 md="3"
                                 >
-                                    <p class="text-right mt-1">Privilegios: </p>
+                                    <p class="text-right mt-1">Profiles: </p>
                                 </v-col>
                                 <v-col
                                 class="pa-0"
@@ -174,9 +176,9 @@
                                 md="8"
                                 >
                                 <v-autocomplete
-                                    :items="privilegios" 
+                                    :items="profiles" 
                                     v-model="inputSelected"
-                                    item-value="key" 
+                                    item-value="idProfile" 
                                     item-text="name"
                                     outlined
                                     rounded
@@ -199,14 +201,14 @@
 import Boton from "../../components/Boton.vue";
 import { btnGuardar } from "../../types/btnDesign.js";
 import ChargeData from "../../components/ChargeData.vue";
-import { saveUser } from "../../services/DataServices";
+import { saveUser, chargeProfiles } from "../../services/DataServices";
 import { setterErrorData } from '../../helpers/setterData.js';
 
 export default {
     name: "RegistrarUser",
-    created: () => ({
-
-    }),
+    created: function () {
+        this.chargePrivileges();
+    },
     data: () => ({
         tipoOpcion: "Registrar un User",
         name: "",
@@ -216,21 +218,15 @@ export default {
         contrasenia2: "",
         loadingMessage: "",
         loading: false,
+        loadingProfile: false,
         errorDetected: false,
         messagesErrorDetected: [],
         btnGuardar,
         showPass1: false,
         showPass2: false,
-        inputSelected:"support",
-        privilegios: [
-          {
-            key: "admin",
-            name: "Admin"
-          },
-          {
-            key: "support",
-            name: "Support"
-          }
+        inputSelected: 0,
+        profiles: [
+          
         ]
     }),
     methods: {
@@ -264,6 +260,24 @@ export default {
                 this.messagesErrorDetected = err;
             }
             this.loading = false;
+        },
+        async chargePrivileges(){
+            this.errorDetected = false;
+            this.loadingProfile = true;
+            this.loading = true;
+            this.loadingMessage = "Cargando perfiles a mostrar";
+            this.profiles = await chargeProfiles()
+            .then(({data})=>{
+                console.log(data);
+                this.inputSelected = data[0].idProfile;
+                return data;
+            })
+            .catch(error => {
+                this.errorDetected = true;
+                this.messagesErrorDetected = setterErrorData(error);
+            });
+            this.loading = false;
+            this.loadingProfile = false;
         },
         setterData(){
             this.lastName = "";
