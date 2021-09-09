@@ -3,7 +3,16 @@
     :headers="headers"
     :items="items"
     class="elevation-1"
+    :search="search"
+    :custom-filter="filterOnlyCapsText"
   >
+    <template v-slot:top>
+        <v-text-field
+          v-model="search"
+          label="Search (UPPER CASE ONLY)"
+          class="mx-4"
+        ></v-text-field>
+      </template>
     <v-dialog v-model="dialogDelete" max-width="500px">
       <v-card>
         <v-card-title class="text-h5">¿Está seguro que desea aliminar el elemento?</v-card-title>
@@ -15,6 +24,10 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <template v-slot:[`item.status`]="{ item }">
+      {{ (item.status === true) ? "Activo": "Inactivo" }}
+    </template>
 
     <template v-slot:[`item.acciones`]="{ item }">
       <v-icon
@@ -48,6 +61,7 @@
         deleteItemIcon: "mdi-delete",
         enableItemIcon: "mdi-check-bold",
         selected: [],
+        search: '',
       }
     },
     computed: {
@@ -79,6 +93,13 @@
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
         })
+      },
+      filterOnlyCapsText (value, search, item) {
+        console.log(value, search, item);
+        return value != null &&
+          search != null &&
+          typeof value === 'string' &&
+          value.toString().toLocaleUpperCase().indexOf(search) !== -1
       }
     },
     props: {

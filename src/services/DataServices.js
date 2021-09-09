@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
-import { obtenerClaveValorPostman, obtenerClaveValorPostmanHeader } from '../helpers/obtenerClaveValorPostman.js';
 import { generarResponsePostman } from '../helpers/generarResponsePostman.js';
 import { jsonToUrlEncode } from '../helpers/setterData';
 
@@ -10,7 +9,7 @@ export const login = async function(payload) {
   return await axios.post(`${urlMdw}/securitys/login`, payload)
   .then(resp => {
     axios.defaults.headers.common['Authorization'] = resp.data.data.token;//Token
-    saveLocalStorage('token',resp.data.data.token);
+    localStorage.setItem('token', resp.data.data.token);
     saveLocalStorage('user', payload.username);
     saveLocalStorage('menu', JSON.stringify(resp.data.data.menu));
     return resp
@@ -32,7 +31,7 @@ export const findCataloguesEndPoints = async function(services) {
   })
 }
 
-export const findReports = async function(tipoReporte="auditoria", params) {
+export const findReports = async function(tipoReporte="auditory", params) {
   return await axios.get(`${urlMdw}/reports/${tipoReporte}?body=${jsonToUrlEncode(params)}`) 
   .then(({data}) => {
     return data;
@@ -75,38 +74,38 @@ export const chargeProfiles = async function(){
 }
 
 export const saveUser = async function(data){
-  return await axios.post(`${urlMdw}/securitys/register`, data)
+  return await axios.post(`${urlMdw}/securitys`, data)
   .then(resp =>{
     return resp.data;
   });
 }
 //********************************************//
 export const findUsers = async function (){
-  return await axios.post(`${urlMdw}/securitys/register`)
+  return await axios.get(`${urlMdw}/securitys`)
   .then(resp =>{
     return resp.data;
   });
 }
-export const findUserById = async function (/* idUser */){
-  return await axios.post(`${urlMdw}/securitys/register`)
+export const findUserById = async function (idUser){
+  return await axios.get(`${urlMdw}/securitys/${idUser}`)
   .then(resp =>{
     return resp.data;
   });
 }
-export const enableUser = async function (/* idUser */){
-  return await axios.post(`${urlMdw}/securitys/register`)
+export const updateUser = async function (user){
+  return await axios.put(`${urlMdw}/securitys`, user)
   .then(resp =>{
     return resp.data;
   });
 }
-export const disableUserById = async function (/* idUser */){
-  return await axios.post(`${urlMdw}/securitys/register`)
+export const enableUserById = async function ({idUser}){
+  return await axios.patch(`${urlMdw}/securitys/${idUser}/true`)
   .then(resp =>{
     return resp.data;
   });
 }
-export const updateUser = async function (/* user */){
-  return await axios.post(`${urlMdw}/securitys/register`)
+export const disableUserById = async function ({idUser}){
+  return await axios.patch(`${urlMdw}/securitys/${idUser}/false`)
   .then(resp =>{
     return resp.data;
   });
@@ -117,13 +116,15 @@ export const peticionPostman = async function(objPostman){
   const timeBeforeRequest = performance.now();
   let tiempo = 0;
   let objetoResp = null;
-  objetoResp = await axios({
+  objetoResp = await axios.post(`${urlMdw}/rest-client`, objPostman)
+
+/*   objetoResp = await axios({
     method: objPostman.peticion,
-    url: objPostman.url,
-    headers: obtenerClaveValorPostmanHeader(objPostman.elementosHeaders),
+    url: `${urlMdw}/rest-client`,
+    headers: obtenerClaveValorPostmanHeader(objPostman.headers),
     params: obtenerClaveValorPostman(objPostman.elementosParams),
     data: {...objPostman.dataJSONEnvio},
-  }) 
+  })  */
 
   .then(resp => {
     console.log(resp);
@@ -170,14 +171,14 @@ export const saveProfile= async function(name, description){
 }
 
 export const disableProfile= async function({idProfile}){
-  return await axios.get(`${urlMdw}/disable/disable?${idProfile}`)
+  return await axios.patch(`${urlMdw}/securitys/maintance/${idProfile}/false`)
   .then(resp =>{
     return resp.data;
   });
 }
 
 export const enableProfile= async function({idProfile}){
-  return await axios.get(`${urlMdw}/enable/enable?${idProfile}`)
+  return await axios.patch(`${urlMdw}/securitys/maintance/${idProfile}/true`)
   .then(resp =>{
     return resp.data;
   });

@@ -43,12 +43,14 @@ export const createProfilesInOptionsUpdates = (optionsSelected, modules, idProfi
 export const itemQueryReport = (modulo, service, categorias) => {
     let endPoints = [];
     try{
-        if(categorias instanceof Array)
-            for(const categoria of categorias )
-                endPoints.push({"key": categoria.key, "service": categoria.keyService, "method": categoria.method});
-        else
-            endPoints.push({"key": categorias.key, "service": categorias.keyService, "method": categorias.method});
-    
+            if(categorias instanceof Array)
+                for(const categoria of categorias )
+                    endPoints.push({"key": categoria.key, "service": categoria.keyService, "method": categoria.method});
+            else{
+                if(categorias.key !== "all" )
+                    endPoints.push({"key": categorias.key, "service": categorias.keyService, "method": categorias.method});
+            }
+
         return [
             {
                 "module": modulo.key,
@@ -68,8 +70,13 @@ export const itemQueryReport = (modulo, service, categorias) => {
 }
 
 export const findObjectToReport = (data, key) => {
-    return (key.toLowerCase() === "all") ? data : data.find(aux => aux.key === key);
+    return data.find(aux => aux.key === key);
 }
+
+export const findObjectToReportEndPoint = (data, name) => {
+    return data.find(aux => aux.name === name);
+}
+
 
 export const jsonToUrlEncode = (json) => { 
     return encodeURIComponent(JSON.stringify(json));

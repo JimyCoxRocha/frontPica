@@ -2,11 +2,10 @@
 
 export const generarObjPostman = () => {
         return {
-                elementosHeaders: null,
-                elementosParams: null,
-                dataJSONEnvio: null,
-                peticion: null,
-                url: null
+                url: "",
+                method: "",
+                body: "",
+                headers: []
         }
 }
 

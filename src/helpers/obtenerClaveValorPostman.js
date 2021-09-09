@@ -1,19 +1,26 @@
 export const obtenerClaveValorPostman = (arreglo) =>{
-    console.log(arreglo);
-    let value = new URLSearchParams();
-    arreglo.forEach(element => {
-        value.append(element.key, decodeURIComponent(element.value));
-    })
-    console.log(value);
-    return value;
+    let urlString = "";
+    
+    for(let i = 0; i<arreglo.length; i++){
+        if(i === 0){
+            urlString = "?" + arreglo[i].key + "=" + encodeURIComponent(arreglo[i].value);
+        }
+        else{
+            urlString = "&" + arreglo[i].key + "=" + encodeURIComponent(arreglo[i].value);
+        }
+    }  
+
+    console.log(urlString);
+    return urlString;
 }
 
 export const obtenerClaveValorPostmanHeader = (arreglo) =>{
-    let listaClaveValor = {};
+    let listaClaveValor = [];
     let objetoClaveValor = {};
     arreglo.forEach(element => {
+        objetoClaveValor = {};
         objetoClaveValor[element.key] = element.value;
-        listaClaveValor = {...listaClaveValor, ...objetoClaveValor};
+        listaClaveValor.push(objetoClaveValor);
     });
     return listaClaveValor;
 }

@@ -3,11 +3,8 @@
       name="input-7-1"
       filled
       :label="label"
-      auto-grow
       v-model="valor"
       @change="obtenerTexto(valor)"
-      hide-details
-      height="23rem"
     ></v-textarea>
 </template>
 

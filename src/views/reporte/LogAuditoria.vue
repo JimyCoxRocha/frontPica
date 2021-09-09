@@ -69,7 +69,7 @@
                 <v-autocomplete
                     :items="categorias" 
                     v-model="inputSelected.keyCategoria"
-                    item-value="key" 
+                    item-value="name" 
                     item-text="name"
                     outlined
                     rounded
@@ -127,7 +127,7 @@
   import { findReports, findCataloguesOptions, findCataloguesEndPoints } from '../../services/DataServices';
   import { consultaReporte } from '../../types/objetoConsultaReporte.js';
   import { convertToPdf } from "../../helpers/convertToPdf.js";
-  import { itemQueryReport, findObjectToReport } from "../../helpers/setterData";
+  import { itemQueryReport, findObjectToReport, findObjectToReportEndPoint } from "../../helpers/setterData";
   import { convertToExcel } from "../../helpers/convertToExcel.js";
   import { btnBuscar, exportarPDF, exportarExcel } from "../../types/btnDesign.js";
 
@@ -196,8 +196,6 @@
               this.inputSelected.keyService = this.servicios[0].key;
               this.categorias = await this.cargarEndpoints(this.servicios[0].key);
               
-              this.inputSelected.keyCategoria = this.categorias[0].key;
-              
 
               this.loadingCatalogue= false;
               this.dataInitialLoaded = true;
@@ -229,7 +227,8 @@
             //Llenamos los módulos
             return await findCataloguesEndPoints(service)
             .then(({data})=>{
-                return data;
+              this.inputSelected.keyCategoria = "Todos";
+              return [{key: "all",name: "Todos"}, ...data]
             })
             .catch(error => {
                 if(!error.response.data.messages)
@@ -243,13 +242,33 @@
             this.errorDetected = false;
             this.messageErrorDetected = "";
             let consulta = consultaReporte(this.valorFechaDesde, this.valorFechaHasta);
-            
+              let keyEndpoint = this.categorias.filter(point => (point.name === this.inputSelected.keyCategoria));
               consulta["items"] = itemQueryReport(
                 findObjectToReport(this.modulos, this.inputSelected.keyModulo),
                 findObjectToReport(this.servicios, this.inputSelected.keyService),
-                findObjectToReport(this.categorias, this.inputSelected.keyCategoria));
+                findObjectToReportEndPoint(this.categorias,  keyEndpoint[0].name));
                 this.loading = true;
-              this.dataSolicitada = await findReports("auditoria", consulta)
+              if(keyEndpoint[0].key !== "all")
+                this.dataSolicitada = await findReports("auditory", consulta)
+                .then(({data})=>{
+                  return data;
+                })
+                .catch(error => {
+                    if(!error.response.data.messages)
+                      throw "No se ha podido acceder al endpoint";
+                    else{
+                      throw error.response.data.messages[0];
+                      }
+                });
+              else
+                this.findAllLogs(consulta);
+            if(this.dataSolicitada.length !== 0 )
+              this.btnDisabled =false;
+            else this.btnDisabled = true;
+            this.loading = false;
+          },
+          async findAllLogs(consulta){
+            this.dataSolicitada = await findReports("audits", consulta)
               .then(({data})=>{
                 return data;
               })
@@ -260,11 +279,10 @@
                     throw error.response.data.messages[0];
                     }
               });
-            
-            if(this.dataSolicitada.length !== 0 )
-              this.btnDisabled =false;
-            else this.btnDisabled = true;
-            this.loading = false;
+              if(this.dataSolicitada.length !== 0 )
+                this.btnDisabled =false;
+              else this.btnDisabled = true;
+                this.loading = false;
           },
           capturarFechaDesde(fecha){
             this.valorFechaDesde = fecha;
@@ -274,7 +292,6 @@
           },
           async serviceSelected(){
             this.categorias = await this.cargarEndpoints(this.inputSelected.keyService);
-            this.inputSelected.keyCategoria = this.categorias[0].key;
           },
           savePDF(){
             convertToPdf(this.dataSolicitada, this.tipoReporte);

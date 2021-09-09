@@ -18,15 +18,20 @@
 
 
             <ChargeData 
-                :errorDetected = "errorDetected"
                 :loading = "loading"
-                :messagesErrorDetected = "messagesErrorDetected"
             >
                     <template slot="msgLoading">
                             <p v-show="loading">Guardando los datos...</p>
                     </template>
             </ChargeData>
+            <Notification
+                v-if="activeNotification"
+                v-model="activeNotification"
+                :isError="errorDetected"
+                :messages = "messagesNotification"
+            />
             <TableEditAndDelete 
+                v-if="!loading"
                 :items="profiles" 
                 :headers="headers" 
                 :editedItem="moduleItems"
@@ -53,10 +58,8 @@
                         > Debe realizar algún cambio </v-alert>
                     </v-container>
                     <v-container>
-                        <ChargeData 
-                            :errorDetected = "errorDetected"
+                        <ChargeData
                             :loading = "loadingSaveData"
-                            :messagesErrorDetected = "messagesErrorDetected"
                         >
                             <template slot="msgLoading">
                                 <p v-show="loadingSaveData">Guardando los datos...</p>
@@ -273,15 +276,16 @@
 </template>
 
 <script>
-import { btnAgregar } from "../../types/btnDesign.js";
 import Boton from "../../components/Boton.vue";
 import TableEditAndDelete from "../../components/TableEditAndDelete.vue";
-import { findProfiles, findProfileOptions, enableProfile, disableProfile, updateProfileInOption, saveProfile } from '../../services/DataServices';
-import { setterProfilesInOptionsActives, createProfilesInOptionsUpdates, setterErrorData } from '../../helpers/setterData';
 import ChargeData from "../../components/ChargeData.vue";
 import DialogAcceptCancel from "../../components/DialogAcceptCancel.vue";
 import TextFieldSimpleData from "../../components/TextFieldSimpleData.vue";
 import CardProfile from "../../components/CardProfile.vue";
+import Notification from "../../components/Notification.vue";
+import { findProfiles, findProfileOptions, enableProfile, disableProfile, updateProfileInOption, saveProfile } from '../../services/DataServices';
+import { btnAgregar } from "../../types/btnDesign.js";
+import { setterProfilesInOptionsActives, createProfilesInOptionsUpdates, setterErrorData } from '../../helpers/setterData';
 import { findLocalStorage } from "../../helpers/handleLocalStorage.js";
 
 export default {
@@ -294,8 +298,9 @@ export default {
         btnAgregar,
         loading: true,
         loadingSaveData: false,
-        messagesErrorDetected: [],
+        messagesNotification: [],
         errorDetected: false,
+        activeNotification: false,
         dialogEdit: false,
         dialogEnableProfile: false,
         dialogDisableProfile: false,
@@ -318,6 +323,16 @@ export default {
         ],
     }),
     methods:{
+        processComplete(message){
+            this.messagesNotification = message;
+            this.errorDetected = false;
+            this.activeNotification =  true;
+        },
+        processError(message){
+            this.messagesNotification = message;
+            this.errorDetected = true;
+            this.activeNotification =  true;
+        },
         async getProfiles(){
             this.loading = true;
             this.profiles = await findProfiles()
@@ -329,8 +344,7 @@ export default {
                     }
                 })
                 .catch(error => {
-                    this.errorDetected = true;
-                    this.messagesErrorDetected = setterErrorData(error);
+                    this.processError(setterErrorData(error));
                 });
                 this.loading = false;
         },
@@ -347,32 +361,33 @@ export default {
                 }
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
             this.dialogEdit = true;
         },
         async disableProfile(){
             await disableProfile(this.editProfileSelected)
             .then((resp)=>{
-                console.log(resp.data);
+                this.processComplete(resp.messages)
+
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
             this.closeDialog();
+            this.getProfiles();
         },
         async enableProfile(){
+            
             await enableProfile(this.editProfileSelected)
             .then((resp)=>{
-                console.log(resp.data);
+                this.processComplete(resp.messages)
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
             this.closeDialog();
+            this.getProfiles();
         },
         async saveProfile () {
             try {
@@ -382,11 +397,10 @@ export default {
                 this.loadingSaveData = true;
                 await updateProfileInOption(profileInOptionUpdates)
                     .then((resp)=>{
-                        console.log(resp.data);
+                        this.processComplete(resp.messages)
                     })
                     .catch(error => {
-                        this.errorDetected = true;
-                        this.messagesErrorDetected = setterErrorData(error);
+                        this.processError(setterErrorData(error));
                     });
                 this.closeDialog();
                 this.getProfiles();
@@ -402,11 +416,10 @@ export default {
 
                 await saveProfile(this.nameProfile, this.descriptionProfile)
                 .then((resp)=>{
-                    console.log(resp.data);
+                    this.processComplete(resp.messages)
                 })
                 .catch(error => {
-                    this.errorDetected = true;
-                    this.messagesErrorDetected = setterErrorData(error);
+                    this.processError(setterErrorData(error));
                 });
                 this.closeDialog();
             } catch (error) {
@@ -422,6 +435,8 @@ export default {
             this.loadingSaveData = false;
         },
         clickAgregar(){
+            this.nameProfile = "";
+            this.descriptionProfile = "";
             this.dialogAddProfile = true;
         },
         disableItem (idProfile) {
@@ -439,7 +454,8 @@ export default {
         ChargeData,
         CardProfile,
         DialogAcceptCancel,
-        TextFieldSimpleData
+        TextFieldSimpleData,
+        Notification
     }
 }
 </script>

@@ -120,8 +120,6 @@
                                     name="input-7-1"
                                     filled
                                     label="Body"
-                                    auto-grow
-                                    hide-details
                                     readonly
                                     :value="respServidor"
                                 >
@@ -141,7 +139,7 @@
     import { btnEnviar } from "../../types/btnDesign.js";
     import { peticionPostman } from "../../services/DataServices.js";
     import { generarObjPostman } from "../../types/objetoPostman.js";
-    import { findLocalStorage } from "../../helpers/handleLocalStorage.js";
+    import { obtenerClaveValorPostman, obtenerClaveValorPostmanHeader } from '../../helpers/obtenerClaveValorPostman.js';
 
     export default {
         name: "Postman",
@@ -155,7 +153,7 @@
             elementosHeaders: [
                 {
                     key: 'Authorization',
-                    value: findLocalStorage('token'),
+                    value: localStorage.getItem('token'),
                     description: 'Token'
                 }
             ],
@@ -180,15 +178,15 @@
             async enviarPeticion(){
                 //llenamos los datos del objeto para enviar al servicio
                 let objetoPeticionPostman = generarObjPostman();
-                objetoPeticionPostman.elementosHeaders = this.elementosHeaders;
-                objetoPeticionPostman.elementosParams = this.elementosParams;
-                objetoPeticionPostman.peticion = this.peticionSelected;
-                objetoPeticionPostman.url = this.enlacePeticion;
+                objetoPeticionPostman.url = this.enlacePeticion + obtenerClaveValorPostman(this.elementosParams);
+                objetoPeticionPostman.method = this.peticionSelected;
+                objetoPeticionPostman.headers = obtenerClaveValorPostmanHeader(this.elementosHeaders);
                 try{
                     //Covertimos a JSON el dato ingresado
                     (this.dataJSONEnvio != "") 
-                        && (objetoPeticionPostman.dataJSONEnvio = JSON.parse(this.dataJSONEnvio));
+                        && (objetoPeticionPostman.body = JSON.parse(this.dataJSONEnvio));
                         
+
                     this.showErrorValidation = false;
                     this.errorValidation = "";
                     this.respServidor = await peticionPostman(objetoPeticionPostman)
