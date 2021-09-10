@@ -26,15 +26,13 @@
                     :clickGuardar = "(optionUpdateUser) ? clickUpdateUser : clickGuardar"
                     >
                     <template slot="charge">
-                        <ChargeData 
-                            :errorDetected = "errorDetected"
-                            :loading = "loading"
-                            :messagesErrorDetected = "messagesErrorDetected"
-                        >
-                                <template slot="msgLoading">
-                                        <p v-show="loading">{{loadingMessage}}</p>
-                                </template>
-                        </ChargeData>
+                    <ChargeData 
+                        :loading = "loading"
+                    >
+                            <template slot="msgLoading">
+                                    <p v-show="loading">Guardando los datos...</p>
+                            </template>
+                    </ChargeData>
                     </template>
                     <template slot="cancel">
                         <v-btn
@@ -128,6 +126,12 @@
                     :enableItem = "enableItem"
                     :deleteItem = "disableItem"
                 />
+                <Notification
+                    v-if="activeNotification"
+                    v-model="activeNotification"
+                    :isError="errorDetected"
+                    :messages = "messagesNotification"
+                />
             </div>
         </div>
     </v-container>
@@ -135,14 +139,15 @@
 
 <script>
 import Boton from "../../components/Boton.vue";
-import { btnAgregar } from "../../types/btnDesign.js";
-import ChargeData from "../../components/ChargeData.vue";
-import { saveUser, chargeProfiles, findUsers, findUserById,
-         enableUserById, disableUserById , updateUser } from "../../services/DataServices";
-import { setterErrorData } from '../../helpers/setterData.js';
 import DialogAcceptCancel from "../../components/DialogAcceptCancel.vue";
 import TableEditAndDelete from "../../components/TableEditAndDelete.vue";
 import FormUser from "../../components/FormUser.vue";
+import Notification from "../../components/Notification.vue";
+import ChargeData from "../../components/ChargeData.vue";
+import { btnAgregar } from "../../types/btnDesign.js";
+import { saveUser, chargeProfiles, findUsers, findUserById,
+         enableUserById, disableUserById , updateUser } from "../../services/DataServices";
+import { setterErrorData } from '../../helpers/setterData.js';
 
 export default {
     name: "RegistrarUser",
@@ -158,7 +163,6 @@ export default {
         errorDetected: false,
         dialogEnableUser: false,
         dialogDisableUser: false,
-        messagesErrorDetected: [],
         btnAgregar,
         optionUpdateUser: false,
         initializer: {
@@ -183,10 +187,22 @@ export default {
           { text: 'Status', value: 'status' },
           { text: 'Acciones', value: 'acciones', sortable: false }
         ],
+        messagesNotification: [],
+        errorDetected: false,
+        activeNotification: false,
     }),
     methods: {
-        async getUsers(){
+        processComplete(message){
+            this.messagesNotification = message;
             this.errorDetected = false;
+            this.activeNotification =  true;
+        },
+        processError(message){
+            this.messagesNotification = message;
+            this.errorDetected = true;
+            this.activeNotification =  true;
+        },
+        async getUsers(){
             this.loading = true;
             this.loadingMessage = "Cargando datos...";
             this.users = await findUsers()
@@ -194,8 +210,7 @@ export default {
                 return data;
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
                 this.loading = false;
         },
@@ -219,43 +234,39 @@ export default {
                 return [data];
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
             this.dialogAddUser = true;
         },
         async clickGuardar(inputSelected, name, lastName,user,contrasenia1){
-            this.errorDetected = false;
             this.loading = true;
             this.loadingMessage = "Guardando usuario...";
             try{
                 
                 await saveUser({"idProfile": inputSelected,"name": name,
                         "lastName": lastName,"user": user,"password": contrasenia1})
-                .then(({data})=>{
-                    return data;
+                .then((data)=>{
+                    this.processComplete(data.messages);
                 })
                 .catch(error => {
                     throw setterErrorData(error);
                 });
                 this.closeDialog();
             }catch(err){
-                this.errorDetected = true;
-                this.messagesErrorDetected = err;
+                this.processError(setterErrorData(error));
+                
             }
             this.loading = false;
             this.getUsers();
         },
         async clickUpdateUser(inputSelected, name, lastName,user,contrasenia1){
-            this.errorDetected = false;
             this.loading = true;
             this.loadingMessage = "Actualizando usuario...";
             try{
-                
                 await updateUser({"idProfile": inputSelected,"name": name,
                         "lastName": lastName,"user": user,"password": contrasenia1, "idUser": this.editUserSelected})
-                .then(({data})=>{
-                    return data;
+                .then((data)=>{
+                    this.processComplete(data.messages);
                 })
                 .catch(error => {
                     throw setterErrorData(error);
@@ -264,8 +275,8 @@ export default {
                 this.closeDialog();
                 this.getUsers();
             }catch(err){
-                this.errorDetected = true;
-                this.messagesErrorDetected = err;
+                this.processError(setterErrorData(error));
+                
             }
             this.loading = false;
             this.optionUpdateUser = false;
@@ -275,11 +286,10 @@ export default {
             this.loading = true;
             await enableUserById(this.editUserSelected)
             .then((resp)=>{
-                console.log(resp)
+                this.processComplete(resp.messages);
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
             this.closeDialog();
             this.loading = false;
@@ -289,11 +299,10 @@ export default {
             this.loading = true;
             await disableUserById(this.editUserSelected)
             .then((resp)=>{
-                console.log(resp)
+                this.processComplete(resp.messages);
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
             this.closeDialog();
             this.getUsers();
@@ -313,21 +322,18 @@ export default {
             this.dialogAddUser = false;
         },
         async chargePrivileges(){
-            this.errorDetected = false;
             this.loadingProfile = true;
             this.loading = true;
             this.loadingMessage = "Cargando perfiles a mostrar";
             this.profiles = await chargeProfiles()
             .then(({data})=>{
-                
                 this.inputSelected = data[0].idProfile;
-                
                 this.dialogAddUser = true;
                 return data;
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
+                
             });
             this.loading = false;
             this.loadingProfile = false;

@@ -60,7 +60,7 @@
                                     cols="7"
                                     md="1"
                                     >
-                                        <Boton :btnData="btnEnviar" :click="enviarPeticion"/>
+                                        <Boton :btnData="btnEnviar" :click="enviarPeticion" :isDisabled="loading"/>
                                     </v-col>
                                     
                                 </v-row>
@@ -75,6 +75,13 @@
                                 <v-tab @click.stop="elementActive = 'HEADERS'">Headers</v-tab>
                                 
                             </v-tabs>
+                            <ChargeData 
+                                :loading = "loading"
+                            >
+                                    <template slot="msgLoading">
+                                            <p v-show="loading">Realizando petición...</p>
+                                    </template>
+                            </ChargeData>
                             <DataTableEdit 
                                 tituloTabla="Params"
                                 :initialize="initializeParams"
@@ -127,6 +134,12 @@
                         </v-card>
                     </v-col>
                 </v-row>
+                <Notification
+                    v-if="activeNotification"
+                    v-model="activeNotification"
+                    :isError="errorDetected"
+                    :messages = "messagesNotification"
+                />
             </div>
         </div>
     </v-container>
@@ -136,6 +149,8 @@
     import Boton from '../../components/Boton.vue';
     import DataTableEdit from '../../components/DataTableEdit.vue';
     import TextAreaAuto from '../../components/TextAreaAuto.vue';
+    import Notification from "../../components/Notification.vue";
+    import { setterErrorData } from '../../helpers/setterData';
     import { btnEnviar } from "../../types/btnDesign.js";
     import { peticionPostman } from "../../services/DataServices.js";
     import { generarObjPostman } from "../../types/objetoPostman.js";
@@ -146,7 +161,7 @@
         data: () => ({
             tipoReporte: "Proceso Postman",
             peticionSelected: "GET",
-            peticiones: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+            peticiones: ["GET", "POST", "PUT", "DELETE"],
             enlacePeticion: "",
             btnEnviar,
             elementosParams: [],
@@ -164,20 +179,37 @@
             time: "",
             size: "",
             errorValidation: "",
-            showErrorValidation: false
+            loading: false,
+            showErrorValidation: false,
+            messagesNotification: [],
+            errorDetected: false,
+            activeNotification: false,
         }),
         components: {
             Boton,
             DataTableEdit,
-            TextAreaAuto
+            TextAreaAuto,
+            Notification
         },
         methods: {
+            processComplete(message){
+                this.messagesNotification = message;
+                this.errorDetected = false;
+                this.activeNotification =  true;
+            },
+            processError(message){
+                this.messagesNotification = message;
+                this.errorDetected = true;
+                this.activeNotification =  true;
+            },
             obtenerTexto(texto){
                 this.dataJSONEnvio = texto;
             },
             async enviarPeticion(){
+                this.loading = true;
                 //llenamos los datos del objeto para enviar al servicio
                 let objetoPeticionPostman = generarObjPostman();
+                console.log(objetoPeticionPostman);
                 objetoPeticionPostman.url = this.enlacePeticion + obtenerClaveValorPostman(this.elementosParams);
                 objetoPeticionPostman.method = this.peticionSelected;
                 objetoPeticionPostman.headers = obtenerClaveValorPostmanHeader(this.elementosHeaders);
@@ -185,7 +217,6 @@
                     //Covertimos a JSON el dato ingresado
                     (this.dataJSONEnvio != "") 
                         && (objetoPeticionPostman.body = JSON.parse(this.dataJSONEnvio));
-                        
 
                     this.showErrorValidation = false;
                     this.errorValidation = "";
@@ -201,9 +232,9 @@
                         return JSON.stringify(error, null, 4);
                     });
                 }catch(err){
-                    this.errorValidation = "Por favor, recuerde ingresar en formato JSON el valor";
-                    this.showErrorValidation = true;
+                    this.processError(setterErrorData(["Por favor, recuerde ingresar en formato JSON el valor"]));
                 }
+                this.loading = false;
             },
             initializeParams(){
                 return this.elementosParams;

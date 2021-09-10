@@ -34,9 +34,7 @@
                     </v-row>
                 </div>
                 <ChargeData 
-                    :errorDetected = "errorDetected"
                     :loading = "loading"
-                    :messagesErrorDetected = "messagesErrorDetected"
                 >
                     <template slot="msgLoading">
                             <p v-show="loading">Cargando los datos...</p>
@@ -49,9 +47,7 @@
                 </v-card-text>
                 </div>
                     <ChargeData 
-                        :errorDetected = "errorBarDetected"
                         :loading = "loadingDataBar"
-                        :messagesErrorDetected = "messagesErrorDetected"
                     >
                         <template slot="msgLoading">
                                 <p v-show="loadingDataBar">Cargando gráfico de barras por servicio...</p>
@@ -67,6 +63,13 @@
                     >
                         <Boton :btnData="btnCerrar" :click="clickCerrar"/>
                     </v-col>
+
+                    <Notification
+                        v-if="activeNotification"
+                        v-model="activeNotification"
+                        :isError="errorDetected"
+                        :messages = "messagesNotification"
+                    />
                 <div>
             </div>
         </div>
@@ -76,10 +79,10 @@
 <script>
 import moment from 'moment';
 import DatePicker from '../../components/DatePicker.vue';
-import { btnBuscar, btnCerrar } from "../../types/btnDesign.js";
 import Boton from '../../components/Boton.vue';
 import ChargeData from '../../components/ChargeData.vue';
-
+import Notification from "../../components/Notification.vue";
+import { btnBuscar, btnCerrar } from "../../types/btnDesign.js";
 import { formatterSeriesBar } from "../../helpers/setterData.js";
 import { findStadisticPie, findStadisticByEndpoint } from "../../services/DataServices.js";
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
@@ -145,13 +148,16 @@ export default {
         showMoreDetailsChart: false,
         errorBarDetected: false,
         errorDetected: false,
-        messagesErrorDetected: [""],
-        servicesBar: []
+        servicesBar: [],
+        messagesNotification: [],
+        errorDetected: false,
+        activeNotification: false,
     }),
     components:{
         DatePicker,
         Boton,
-        ChargeData
+        ChargeData,
+        Notification
     },
     computed:{
         chartOptionsPie: function() {
@@ -193,6 +199,16 @@ export default {
         },
     },
     methods:{
+        processComplete(message){
+            this.messagesNotification = message;
+            this.errorDetected = false;
+            this.activeNotification =  true;
+        },
+        processError(message){
+            this.messagesNotification = message;
+            this.errorDetected = true;
+            this.activeNotification =  true;
+        },
          async cargarDatosDetalleBar (index) {
              const indexReport = ["auditory", "error"];
             if(indexReport[index] === this.seriesBar[0].name){
@@ -208,21 +224,15 @@ export default {
                         return data;
                     })
                     .catch(error => {
-                        this.errorBarDetected = true;
-                        if(!error.response.data.messages)
-                            this.messagesErrorDetected = ["No se ha podido acceder al endpoint"];
-                        else{
-                            this.messagesErrorDetected = error.response.data.messages;
-                            }
-                            
+                        this.processError(setterErrorData(error));
                     });
             
                 let aux = formatterSeriesBar(data);
                 this.servicesBar = aux.keys;
                 this.seriesBar = aux.count;
-                console.log(this.seriesBar);
                 this.showMoreDetailsChart = true;
             }catch(err){
+                this.processError(setterErrorData(err));
                 this.showMoreDetailsChart = false;
             }
             this.loadingDataBar = false;
@@ -249,13 +259,7 @@ export default {
                   return [data.logAuditory, data.logError];
               })
               .catch(error => {
-                  this.errorDetected = true;
-                  if(!error.response.data.messages)
-                      this.messagesErrorDetected = ["No se ha podido acceder al endpoint"];
-                  else{
-                    this.messagesErrorDetected = error.response.data.messages;
-                    }
-                    
+                  this.processError(setterErrorData(error));
               });
             
             this.loading = false;
@@ -266,13 +270,7 @@ export default {
                   return [data.logAuditory, data.logError];
               })
               .catch(error => {
-                  this.errorDetected = true;
-                  if(!error.response.data.messages)
-                      this.messagesErrorDetected = ["No se ha podido acceder al endpoint"];
-                  else{
-                    this.messagesErrorDetected = error.response.data.messages;
-                    }
-                    
+                  this.processError(setterErrorData(error));
               });
         }
     }

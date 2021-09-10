@@ -368,7 +368,7 @@ export default {
         async disableProfile(){
             await disableProfile(this.editProfileSelected)
             .then((resp)=>{
-                this.processComplete(resp.messages)
+                this.processComplete(resp.messages);
 
             })
             .catch(error => {

@@ -114,6 +114,12 @@
           </v-progress-linear>
             <p v-show="loading">Cargando los datos...</p>
           <TableReporte :items="dataSolicitada"/>
+          <Notification
+              v-if="activeNotification"
+              v-model="activeNotification"
+              :isError="errorDetected"
+              :messages = "messagesNotification"
+          />
         </div>
       </div>
     </v-container>
@@ -125,10 +131,11 @@
   import moment from 'moment';
   import Boton from '../../components/Boton.vue';
   import TableReporte from '../../components/TableReporte.vue';
+  import Notification from "../../components/Notification.vue";
   import { findReports, findCataloguesOptions, findCataloguesEndPoints } from '../../services/DataServices';
   import { consultaReporte } from '../../types/objetoConsultaReporte.js';
   import { convertToPdf } from "../../helpers/convertToPdf.js";
-  import { itemQueryReport, findObjectToReport, findObjectToReportEndPoint } from "../../helpers/setterData";
+  import { itemQueryReport, findObjectToReport, findObjectToReportEndPoint, setterErrorData  } from "../../helpers/setterData";
   import { convertToExcel } from "../../helpers/convertToExcel.js";
   import { btnBuscar, exportarPDF, exportarExcel } from "../../types/btnDesign.js";
 
@@ -175,7 +182,10 @@
         dataSolicitada: [],
         loading: false,
         loadingCatalogue: true,
-        dataInitialLoaded: false
+        dataInitialLoaded: false,
+        messagesNotification: [],
+        errorDetected: false,
+        activeNotification: false,
       }),
       components:{
         Boton,
@@ -184,6 +194,16 @@
         Select
       },
       methods:{
+        processComplete(message){
+            this.messagesNotification = message;
+            this.errorDetected = false;
+            this.activeNotification =  true;
+        },
+        processError(message){
+            this.messagesNotification = message;
+            this.errorDetected = true;
+            this.activeNotification =  true;
+        },
           async cargarCatalogos(){
             this.loadingCatalogue= true;
             this.dataInitialLoaded = false;
@@ -202,8 +222,7 @@
               this.loadingCatalogue= false;
               this.dataInitialLoaded = true;
             }catch(err){
-              this.errorDetected = true;
-              this.messageErrorDetected = err;
+              this.processError(setterErrorData(err));
               this.loadingCatalogue= false;
               this.dataInitialLoaded = false;
             }
@@ -215,14 +234,9 @@
                 return data;
             })
             .catch(error => {
-              this.errorDetected = true;
               this.loadingCatalogue= false;
               this.dataInitialLoaded = false;
-                if(!error.response.data.messages)
-                    this.messageErrorDetected = "No se ha podido acceder al endpoint";
-                else{
-                    this.messageErrorDetected =  `Carga de ${tipoCatalogo}: `+ error.response.data.messages[0];
-                  }
+              this.processError(setterErrorData(error));
             });
           },
           async cargarEndpoints(service){
@@ -233,11 +247,7 @@
               return [{key: "all",name: "Todos"}, ...data]
             })
             .catch(error => {
-                if(!error.response.data.messages)
-                    console.log("No se ha podido acceder al endpoint");
-                else{
-                  throw `Carga de ${service}: `+ error.response.data.messages[0];
-                  }
+              this.processError(setterErrorData(error));
             });
           },
           async clickBuscar(){
@@ -257,11 +267,7 @@
                   return data;
                 })
                 .catch(error => {
-                    if(!error.response.data.messages)
-                      throw "No se ha podido acceder al endpoint";
-                    else{
-                      throw error.response.data.messages[0];
-                      }
+                  this.processError(setterErrorData(error));
                 });
               else
                 this.findAllLogs(consulta);
@@ -276,11 +282,7 @@
                 return data;
               })
               .catch(error => {
-                  if(!error.response.data.messages)
-                    throw "No se ha podido acceder al endpoint";
-                  else{
-                    throw error.response.data.messages[0];
-                    }
+                this.processError(setterErrorData(error));
               });
             if(this.dataSolicitada.length !== 0 )
               this.btnDisabled =false;

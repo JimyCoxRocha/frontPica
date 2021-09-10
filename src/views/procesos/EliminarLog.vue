@@ -89,9 +89,7 @@
             </v-col>
             </div>
             <ChargeData 
-                :errorDetected = "errorDetected"
                 :loading = "loading"
-                :messagesErrorDetected = "messagesErrorDetected"
             >
                     <template slot="msgLoading">
                             <p v-show="loading">{{loadingMessage}}</p>
@@ -106,7 +104,13 @@
                 :headers="headers" 
                 itemKey="_id"
                 :columnEdit="false"
-                />
+            />
+            <Notification
+                v-if="activeNotification"
+                v-model="activeNotification"
+                :isError="errorDetected"
+                :messages = "messagesNotification"
+            />
             </div>
             </div>
         </div>
@@ -118,6 +122,7 @@ import moment from 'moment';
 import DatePicker from '../../components/DatePicker.vue';
 import Boton from '../../components/Boton.vue';
 import TableSelectLog from "../../components/TableSelectLog.vue";
+import Notification from "../../components/Notification.vue";
 import { btnBuscar, btnDelete } from "../../types/btnDesign.js";
 import { findLogsToDelete, deleteLogs } from '../../services/DataServices';
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
@@ -133,7 +138,6 @@ export default {
         valorFechaDesde: moment(Date.now()).subtract(1, 'day').format('YYYY-MM-DD'),
         valorFechaHasta: moment(Date.now()).format('YYYY-MM-DD'),
         dataSolicitada: [],
-        messagesErrorDetected: [],
         showButonDelete: false,
         btnBuscar,
         btnDelete,
@@ -154,8 +158,21 @@ export default {
           { text: 'Path categoría', value: 'pathController' },
           { text: 'Fecha', value: 'date' }
         ],
+        messagesNotification: [],
+        errorDetected: false,
+        activeNotification: false,
     }),
     methods:{
+        processComplete(message){
+            this.messagesNotification = message;
+            this.errorDetected = false;
+            this.activeNotification =  true;
+        },
+        processError(message){
+            this.messagesNotification = message;
+            this.errorDetected = true;
+            this.activeNotification =  true;
+        },
         async chargeData(afterDelete){
             (afterDelete) ? 
                 this.loadingMessage = "Actualizando tabla..." :
@@ -167,10 +184,8 @@ export default {
                 return data;
             })
             .catch(error => {
+                this.processError(setterErrorData(error));this.processError(setterErrorData(error));
                 this.showButonDelete = false;
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
-                return [];
             });
             
         },
@@ -185,13 +200,11 @@ export default {
             this.dialog = false;
             this.loading = true;
             await deleteLogs(formatterLogsDelete(this.selected))
-            .then(({data})=>{
-                console.log(data);
-                return data;
+            .then((data)=>{
+                this.processComplete(data.messages);
             })
             .catch(error => {
-                this.errorDetected = true;
-                this.messagesErrorDetected = setterErrorData(error);
+                this.processError(setterErrorData(error));
             });
              this.dataSolicitada = await this.chargeData(true);
              this.selected = [];
@@ -216,7 +229,8 @@ export default {
         DatePicker,
         Boton,
         TableSelectLog,
-        ChargeData
+        ChargeData,
+        Notification
     },
     
 }
