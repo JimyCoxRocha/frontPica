@@ -143,7 +143,6 @@ export default {
         btnDelete,
         loading: false,
         btnDisabled: true,
-        errorDetected: false,
         loadingMessage: "",
         dialog: false,
         selected: [],

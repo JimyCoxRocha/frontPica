@@ -9,10 +9,10 @@
     <template v-slot:top>
         <v-text-field
           v-model="search"
-          label="Search (UPPER CASE ONLY)"
+          label="Search (AÚN NO FUNCIONA)"
           class="mx-4"
         ></v-text-field>
-      </template>
+    </template>
     <v-dialog v-model="dialogDelete" max-width="500px">
       <v-card>
         <v-card-title class="text-h5">¿Está seguro que desea aliminar el elemento?</v-card-title>
@@ -28,23 +28,29 @@
     <template v-slot:[`item.status`]="{ item }">
       {{ (item.status === true) ? "Activo": "Inactivo" }}
     </template>
-
     <template v-slot:[`item.acciones`]="{ item }">
-      <v-icon
-        small
-        class="mr-2"
-        @click="funcEditItem(item)"
-      >
-        mdi-pencil
-      </v-icon>
+      <div v-if="optionDisabled(item)">
 
-      <v-icon
-        small
-        @click="(item.status) ? deleteItem(item) : enableItem(item)"
-      >
-      {{optionActiveDesactive(item)}}
-        
-      </v-icon>
+      
+        <v-icon
+          small
+          class="mr-2"
+          @click="funcEditItem(item)"
+        >
+          mdi-pencil
+        </v-icon>
+
+        <v-icon
+          small
+          @click="(item.status) ? deleteItem(item) : enableItem(item)"
+        >
+        {{optionActiveDesactive(item)}}
+          
+        </v-icon>
+      </div>
+      <div v-else>
+         <p class="blue--text ma-0 pa-0">Activo</p>
+      </div>
     </template>
   </v-data-table>
 </template>
@@ -67,7 +73,7 @@
     computed: {
       formTitle () {
         return this.editedIndex === -1 ? 'Agregar' : 'Editar'
-      }
+      },
     },
 
     watch: {
@@ -79,6 +85,25 @@
       },
     },
     methods:{
+        optionDisabled(item){      
+        if (this.typeRegister === "user"){
+          if(item.idUser === this.disableOptionIn){
+            return false;}
+          else{
+            return true;}
+        }
+
+        if(this.typeRegister === "profile"){
+          if(item.idProfile === this.disableOptionIn)
+            return false;
+          else
+            return true;
+        }
+        return true;
+      },
+      valor: function(val){
+        console.log(val);
+      },
       optionActiveDesactive: function ({status}){
         return (status) ? this.deleteItemIcon : this.enableItemIcon;
       },
@@ -103,6 +128,12 @@
       }
     },
     props: {
+        disableOptionIn:{
+          type: Number
+        },
+        typeRegister:{
+          type: String
+        },
         items:{
             type: Array,
             required: true

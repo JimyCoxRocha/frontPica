@@ -9,7 +9,35 @@
             >
                 <v-toolbar-title>{{tipoOpcion}}</v-toolbar-title>
         </v-toolbar>
+
+
         <div class="mt-10 mr-4 ml-4 mb-10">
+            <v-col cols="6">
+                <v-row>
+                    <v-col cols="2">
+                        <p  class="mb-0 mt-2">Estado: </p>
+                    </v-col>
+                    <v-col
+                        cols="7"
+                        >
+                            <v-autocomplete
+                            :items="status" 
+                            v-model="statusSelected.key"
+                            item-value="key" 
+                            item-text="name"
+                            outlined
+                            rounded
+                            dense
+                            hide-details
+                        ></v-autocomplete>
+                    </v-col>
+                    <v-col
+                        class="mt-0 pb-0 mb-0"
+                        md="2">
+                        <Boton :btnData="btnBuscar" :click="clickBuscar"/>
+                    </v-col>
+                </v-row>
+            </v-col>
             <v-col
                 class="mt-0 pa-0 mb-9"
                 md="1">
@@ -21,7 +49,7 @@
                 :loading = "loading"
             >
                     <template slot="msgLoading">
-                            <p v-show="loading">Guardando los datos...</p>
+                            <p v-show="loading">Cargando los datos...</p>
                     </template>
             </ChargeData>
             <Notification
@@ -31,6 +59,8 @@
                 :messages = "messagesNotification"
             />
             <TableEditAndDelete 
+                :disableOptionIn="obtainItemDisabled"
+                typeRegister = "profile"
                 v-if="!loading"
                 :items="profiles" 
                 :headers="headers" 
@@ -55,18 +85,19 @@
                     <v-container v-if = "showAlertInfo">
                         <v-alert
                             type="info"
-                        > Debe realizar algún cambio </v-alert>
+                        > {{textShowAlert}} </v-alert>
                     </v-container>
                     <v-container>
                         <ChargeData
                             :loading = "loadingSaveData"
+
                         >
                             <template slot="msgLoading">
                                 <p v-show="loadingSaveData">Guardando los datos...</p>
                             </template>
                         </ChargeData>
                     </v-container>
-                    <v-card-text>
+                    <v-card-text v-if="!loadingSaveData">
                         <v-container>
                             <v-row>
                             <v-col cols="12"
@@ -284,7 +315,7 @@ import TextFieldSimpleData from "../../components/TextFieldSimpleData.vue";
 import CardProfile from "../../components/CardProfile.vue";
 import Notification from "../../components/Notification.vue";
 import { findProfiles, findProfileOptions, enableProfile, disableProfile, updateProfileInOption, saveProfile } from '../../services/DataServices';
-import { btnAgregar } from "../../types/btnDesign.js";
+import { btnAgregar, btnBuscar } from "../../types/btnDesign.js";
 import { setterProfilesInOptionsActives, createProfilesInOptionsUpdates, setterErrorData } from '../../helpers/setterData';
 import { findLocalStorage } from "../../helpers/handleLocalStorage.js";
 
@@ -296,6 +327,7 @@ export default {
     data: () => ({
         tipoOpcion: "Mantenimiento de perfil",
         btnAgregar,
+        btnBuscar,
         loading: true,
         loadingSaveData: false,
         messagesNotification: [],
@@ -307,6 +339,7 @@ export default {
         dialogAddProfile: false,
         editProfileSelected: 0,
         showAlertInfo: false,
+        textShowAlertInfo: "",
         nameProfile: "",
         descriptionProfile: "",
         interactivities: [],
@@ -321,7 +354,34 @@ export default {
           { text: 'Usuarios', value: 'numUsers' },
           { text: 'Acciones', value: 'acciones', sortable: false }
         ],
+        status : [
+            {
+                key: "true",
+                name: "Activo"
+            },
+            {
+                key: "false",
+                name: "Inactivo"
+            },
+            {
+                key: "all",
+                name: "Todos"
+            }
+        ],
+        statusSelected: {
+            key: "all"
+        },
     }),
+    computed:{
+        obtainItemDisabled: function (){
+            try{
+                return parseInt(localStorage.getItem("idProfile"));
+            }catch(error){
+                this.processError(["Error al intentar obtener el usuario de esta sesión."]);
+                return 0;
+            }
+        }
+    },
     methods:{
         processComplete(message){
             this.messagesNotification = message;
@@ -335,7 +395,7 @@ export default {
         },
         async getProfiles(){
             this.loading = true;
-            this.profiles = await findProfiles()
+            this.profiles = await findProfiles("all")
                 .then((resp)=>{
                     if(resp.data.length > 0){
                         return resp.data;
@@ -345,6 +405,24 @@ export default {
                 })
                 .catch(error => {
                     this.processError(setterErrorData(error));
+                    return [];
+                });
+                this.statusSelected.key = "all";
+                this.loading = false;
+        },
+        async clickBuscar(){
+            this.loading = true;
+            this.profiles = await findProfiles(this.statusSelected.key)
+                .then((resp)=>{
+                    if(resp.data.length > 0){
+                        return resp.data;
+                    }else{
+                        return [];
+                    }
+                })
+                .catch(error => {
+                    this.processError(setterErrorData(error));
+                    return [];
                 });
                 this.loading = false;
         },
@@ -359,17 +437,21 @@ export default {
                 }else{
                     return [];
                 }
+                
             })
             .catch(error => {
+                
                 this.processError(setterErrorData(error));
+                return [];
             });
+
             this.dialogEdit = true;
         },
         async disableProfile(){
             await disableProfile(this.editProfileSelected)
             .then((resp)=>{
                 this.processComplete(resp.messages);
-
+                this.getProfiles();
             })
             .catch(error => {
                 this.processError(setterErrorData(error));
@@ -397,17 +479,22 @@ export default {
                 this.loadingSaveData = true;
                 await updateProfileInOption(profileInOptionUpdates)
                     .then((resp)=>{
+                        this.closeDialog();
+                        this.getProfiles();
                         this.processComplete(resp.messages)
                     })
                     .catch(error => {
-                        this.processError(setterErrorData(error));
+                        this.showAlertInfo = true;
+                        this.selected = setterProfilesInOptionsActives(this.moduleItems);
+                        this.textShowAlertInfo = "Ha ocurrido un error al actualizar el perfil. Intente otra vez.: "+error;
+                        this.loadingSaveData = false;
                     });
-                this.closeDialog();
-                this.getProfiles();
             } catch (error) {
                 this.showAlertInfo = true;
+                this.textShowAlertInfo = "Ha ocurrido un error al actualizar el perfil. Intente otra vez.";
                 this.selected = setterProfilesInOptionsActives(this.moduleItems);
             }
+            console.log(this.moduleItems);
         },
         async addProfile () {
             try {
@@ -417,6 +504,7 @@ export default {
                 await saveProfile(this.nameProfile, this.descriptionProfile)
                 .then((resp)=>{
                     this.processComplete(resp.messages)
+                    this.getProfiles();
                 })
                 .catch(error => {
                     this.processError(setterErrorData(error));

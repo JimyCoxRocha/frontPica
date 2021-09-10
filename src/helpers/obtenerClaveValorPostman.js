@@ -2,15 +2,14 @@ export const obtenerClaveValorPostman = (arreglo) =>{
     let urlString = "";
     
     for(let i = 0; i<arreglo.length; i++){
-        if(i === 0){
-            urlString = "?" + arreglo[i].key + "=" + encodeURIComponent(arreglo[i].value);
+        console.log(i, arreglo.length);
+        if(i == 0){
+            urlString = "?" + arreglo[i].key + "=" + arreglo[i].value;
         }
         else{
-            urlString = "&" + arreglo[i].key + "=" + encodeURIComponent(arreglo[i].value);
+            urlString = urlString + "&" + arreglo[i].key + "=" + arreglo[i].value;
         }
-    }  
-
-    console.log(urlString);
+    }
     return urlString;
 }
 

@@ -7,8 +7,8 @@ function crearArray( data ) {
         data.forEach    (element => {
                 body.push([
                     element.pathController,
-                    element.pathEndpoint, 
-                    element.dateOutput,
+                    element.pathEndPoint, 
+                    element.date,
                     JSON.stringify(element.dataInput),
                     JSON.stringify(element.dataOutput),
                 ]);

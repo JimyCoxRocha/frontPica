@@ -150,7 +150,6 @@
         fechaActual: moment(Date.now()).format('YYYY-MM-DD'),
         valorFechaDesde: moment(Date.now()).subtract(1, 'day').format('YYYY-MM-DD'),
         valorFechaHasta: moment(Date.now()).format('YYYY-MM-DD'),
-        errorDetected: false,
         messageErrorDetected: "",
         inputSelected: {
             keyModulo: "pos-pica",
@@ -191,7 +190,8 @@
         Boton,
         TableReporte,
         DatePicker,
-        Select
+        Select,
+        Notification
       },
       methods:{
         processComplete(message){
@@ -237,6 +237,7 @@
               this.loadingCatalogue= false;
               this.dataInitialLoaded = false;
               this.processError(setterErrorData(error));
+              return [];
             });
           },
           async cargarEndpoints(service){
@@ -248,6 +249,7 @@
             })
             .catch(error => {
               this.processError(setterErrorData(error));
+              return [];
             });
           },
           async clickBuscar(){
@@ -268,6 +270,7 @@
                 })
                 .catch(error => {
                   this.processError(setterErrorData(error));
+                  return [];
                 });
               else
                 this.findAllLogs(consulta);
@@ -283,6 +286,7 @@
               })
               .catch(error => {
                 this.processError(setterErrorData(error));
+                return [];
               });
             if(this.dataSolicitada.length !== 0 )
               this.btnDisabled =false;

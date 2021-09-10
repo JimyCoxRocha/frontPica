@@ -123,7 +123,11 @@ export const formatterLogsDelete = (logs) => {
 }
 
 export const setterErrorData = (msg) => {
+    
     try{
+        if(msg.response.data.messages === undefined)
+            return ["Bad Request: intente otra vez."];
+
         return  msg.response.data.messages;
     }catch(err){
         return ["Error en la comunicación con el servicio."];

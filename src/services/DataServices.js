@@ -11,6 +11,8 @@ export const login = async function(payload) {
     axios.defaults.headers.common['Authorization'] = resp.data.data.token;//Token
     localStorage.setItem('token', resp.data.data.token);
     saveLocalStorage('user', payload.username);
+    localStorage.setItem('idUser', resp.data.data.user.idUser);
+    localStorage.setItem('idProfile', resp.data.data.user.idProfile);
     saveLocalStorage('menu', JSON.stringify(resp.data.data.menu));
     return resp
   });
@@ -80,8 +82,12 @@ export const saveUser = async function(data){
   });
 }
 //********************************************//
-export const findUsers = async function (){
-  return await axios.get(`${urlMdw}/securitys`)
+export const findUsers = async function (status){
+  if(status == "all")
+    status = "";
+  else
+    status = `/status/${status}`;
+  return await axios.get(`${urlMdw}/securitys${status}`)
   .then(resp =>{
     return resp.data;
   });
@@ -142,8 +148,12 @@ export const peticionPostman = async function(objPostman){
   return objetoResp;
 }
 
-export const findProfiles = async function(){
-  return await axios.get(`${urlMdw}/securitys/maintance`)
+export const findProfiles = async function(status){
+  if(status == "all")
+    status = "";
+  else
+    status = `/${status}`;
+  return await axios.get(`${urlMdw}/securitys/maintance${status}`)
   .then(resp =>{
     return resp.data;
   });

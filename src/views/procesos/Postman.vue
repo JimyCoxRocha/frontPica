@@ -150,6 +150,7 @@
     import DataTableEdit from '../../components/DataTableEdit.vue';
     import TextAreaAuto from '../../components/TextAreaAuto.vue';
     import Notification from "../../components/Notification.vue";
+    import ChargeData from "../../components/ChargeData.vue";
     import { setterErrorData } from '../../helpers/setterData';
     import { btnEnviar } from "../../types/btnDesign.js";
     import { peticionPostman } from "../../services/DataServices.js";
@@ -166,11 +167,11 @@
             btnEnviar,
             elementosParams: [],
             elementosHeaders: [
-                {
+                /* {
                     key: 'Authorization',
                     value: localStorage.getItem('token'),
                     description: 'Token'
-                }
+                } */
             ],
             elementActive: "BODY",
             dataJSONEnvio: ``,
@@ -189,7 +190,8 @@
             Boton,
             DataTableEdit,
             TextAreaAuto,
-            Notification
+            Notification,
+            ChargeData
         },
         methods: {
             processComplete(message){
@@ -206,11 +208,12 @@
                 this.dataJSONEnvio = texto;
             },
             async enviarPeticion(){
+                this.respServidor = "";
                 this.loading = true;
                 //llenamos los datos del objeto para enviar al servicio
                 let objetoPeticionPostman = generarObjPostman();
-                console.log(objetoPeticionPostman);
-                objetoPeticionPostman.url = this.enlacePeticion + obtenerClaveValorPostman(this.elementosParams);
+                let initialURL = this.enlacePeticion + obtenerClaveValorPostman(this.elementosParams);
+                objetoPeticionPostman.url = initialURL.replaceAll("\"", "'");
                 objetoPeticionPostman.method = this.peticionSelected;
                 objetoPeticionPostman.headers = obtenerClaveValorPostmanHeader(this.elementosHeaders);
                 try{

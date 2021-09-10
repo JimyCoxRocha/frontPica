@@ -83,7 +83,7 @@ import Boton from '../../components/Boton.vue';
 import ChargeData from '../../components/ChargeData.vue';
 import Notification from "../../components/Notification.vue";
 import { btnBuscar, btnCerrar } from "../../types/btnDesign.js";
-import { formatterSeriesBar } from "../../helpers/setterData.js";
+import { formatterSeriesBar, setterErrorData } from "../../helpers/setterData.js";
 import { findStadisticPie, findStadisticByEndpoint } from "../../services/DataServices.js";
 import { consultaReporte } from '../../types/objetoConsultaReporte.js';
 
@@ -147,7 +147,6 @@ export default {
         loadingDataBar: false,
         showMoreDetailsChart: false,
         errorBarDetected: false,
-        errorDetected: false,
         servicesBar: [],
         messagesNotification: [],
         errorDetected: false,

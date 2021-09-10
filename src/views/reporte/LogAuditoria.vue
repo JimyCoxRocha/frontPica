@@ -148,7 +148,6 @@
         fechaActual: moment(Date.now()).format('YYYY-MM-DD'),
         valorFechaDesde: moment(Date.now()).subtract(1, 'day').format('YYYY-MM-DD'),
         valorFechaHasta: moment(Date.now()).format('YYYY-MM-DD'),
-        errorDetected: false,
         messageErrorDetected: "",
         inputSelected: {
             keyModulo: "pos-pica",
@@ -181,9 +180,6 @@
         loading: false,
         loadingCatalogue: true,
         dataInitialLoaded: false,
-        messagesNotification: [],
-        errorDetected: false,
-        activeNotification: false,
         messagesNotification: [],
         errorDetected: false,
         activeNotification: false,
@@ -249,6 +245,7 @@
           })
           .catch(error => {
             this.processError(setterErrorData(error));
+            return [];
           });
         },
         async clickBuscar(){
@@ -268,6 +265,7 @@
               })
               .catch(error => {
                   this.processError(setterErrorData(error));
+                  return [];
               });
             else
               this.findAllLogs(consulta);
@@ -283,6 +281,7 @@
             })
             .catch(error => {
                 this.processError(setterErrorData(error));
+                return [];
             });
             if(this.dataSolicitada.length !== 0 )
               this.btnDisabled =false;

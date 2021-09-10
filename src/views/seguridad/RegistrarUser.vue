@@ -10,6 +10,34 @@
                 <v-toolbar-title>{{tipoOpcion}}</v-toolbar-title>
             </v-toolbar>
             <div class="mt-10 mr-4 ml-4 mb-10">
+
+                <v-col cols="6">
+                    <v-row>
+                        <v-col cols="2">
+                            <p  class="mb-0 mt-2">Estado: </p>
+                        </v-col>
+                        <v-col
+                            cols="7"
+                            >
+                                <v-autocomplete
+                                :items="status" 
+                                v-model="statusSelected.key"
+                                item-value="key" 
+                                item-text="name"
+                                outlined
+                                rounded
+                                dense
+                                hide-details
+                            ></v-autocomplete>
+                        </v-col>
+                        <v-col
+                            class="mt-0 pb-0 mb-0"
+                            md="2">
+                            <Boton :btnData="btnBuscar" :click="clickBuscar"/>
+                        </v-col>
+                    </v-row>
+                </v-col>
+
                 <v-col
                     class="mt-0 pa-0 mb-9"
                     md="1">
@@ -118,6 +146,8 @@
                 </DialogAcceptCancel>
 
                 <TableEditAndDelete 
+                    :disableOptionIn="obtainItemDisabled"
+                    typeRegister = "user"
                     v-if="!loading"
                     :items="users" 
                     :headers="headers" 
@@ -144,7 +174,7 @@ import TableEditAndDelete from "../../components/TableEditAndDelete.vue";
 import FormUser from "../../components/FormUser.vue";
 import Notification from "../../components/Notification.vue";
 import ChargeData from "../../components/ChargeData.vue";
-import { btnAgregar } from "../../types/btnDesign.js";
+import { btnAgregar, btnBuscar } from "../../types/btnDesign.js";
 import { saveUser, chargeProfiles, findUsers, findUserById,
          enableUserById, disableUserById , updateUser } from "../../services/DataServices";
 import { setterErrorData } from '../../helpers/setterData.js';
@@ -160,7 +190,6 @@ export default {
         loadingMessage: "",
         loading: false,
         loadingProfile: false,
-        errorDetected: false,
         dialogEnableUser: false,
         dialogDisableUser: false,
         btnAgregar,
@@ -184,13 +213,42 @@ export default {
           { text: 'ID', align: 'start', sortable: true, value: 'idUser', },
           { text: 'Name', value: 'name' },
           { text: 'User', value: 'user' },
+          { text: 'Profile', value: 'nameProfile' },
           { text: 'Status', value: 'status' },
           { text: 'Acciones', value: 'acciones', sortable: false }
         ],
         messagesNotification: [],
         errorDetected: false,
         activeNotification: false,
+        btnBuscar,
+        status : [
+            {
+                key: "true",
+                name: "Activo"
+            },
+            {
+                key: "false",
+                name: "Inactivo"
+            },
+            {
+                key: "all",
+                name: "Todos"
+            }
+        ],
+        statusSelected: {
+            key: "all"
+        },
     }),
+    computed:{
+        obtainItemDisabled: function (){
+            try{
+                return parseInt(localStorage.getItem("idUser"));
+            }catch(error){
+                this.processError(["Error al intentar obtener el usuario de esta sesión."]);
+                return 0;
+            }
+        }
+    },
     methods: {
         processComplete(message){
             this.messagesNotification = message;
@@ -205,13 +263,32 @@ export default {
         async getUsers(){
             this.loading = true;
             this.loadingMessage = "Cargando datos...";
-            this.users = await findUsers()
+            this.users = await findUsers("all")
             .then(({data})=>{
                 return data;
             })
             .catch(error => {
                 this.processError(setterErrorData(error));
+                return [];
             });
+                this.statusSelected.key = "all";
+                this.loading = false;
+        },
+        async clickBuscar(){
+            this.loading = true;
+            this.users = await findUsers(this.statusSelected.key)
+                .then((resp)=>{
+                    if(resp.data.length > 0){
+                        return resp.data;
+                    }else{
+                        return [];
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    this.processError(setterErrorData(error));
+                    return [];
+                });
                 this.loading = false;
         },
         clickAgregar(){
@@ -231,12 +308,12 @@ export default {
                 this.initializer = data;
                 this.initializer.contrasenia2 = data.password;
                 this.initializer.contrasenia1 = data.password;
+                this.dialogAddUser = true;
                 return [data];
             })
             .catch(error => {
                 this.processError(setterErrorData(error));
             });
-            this.dialogAddUser = true;
         },
         async clickGuardar(inputSelected, name, lastName,user,contrasenia1){
             this.loading = true;
@@ -253,7 +330,7 @@ export default {
                 });
                 this.closeDialog();
             }catch(err){
-                this.processError(setterErrorData(error));
+                this.processError(setterErrorData(err));
                 
             }
             this.loading = false;
@@ -267,19 +344,20 @@ export default {
                         "lastName": lastName,"user": user,"password": contrasenia1, "idUser": this.editUserSelected})
                 .then((data)=>{
                     this.processComplete(data.messages);
+                    this.setterData();
+                    this.closeDialog();
+                    this.getUsers();
+                    this.optionUpdateUser = false;
                 })
                 .catch(error => {
-                    throw setterErrorData(error);
+                    this.optionUpdateUser = true;
+                    this.processError(setterErrorData(error));
                 });
-                this.setterData();
-                this.closeDialog();
-                this.getUsers();
             }catch(err){
-                this.processError(setterErrorData(error));
-                
+                this.optionUpdateUser = true;
+                this.processError(setterErrorData(err));
             }
             this.loading = false;
-            this.optionUpdateUser = false;
             this.getUsers();
         },
         async enableUser(){
@@ -351,7 +429,8 @@ export default {
         ChargeData,
         TableEditAndDelete,
         DialogAcceptCancel,
-        FormUser
+        FormUser,
+        Notification
     }
 }
 </script>

@@ -194,7 +194,7 @@
                 <v-btn
                     color="blue darken-1"
                     text
-                    @click="(saveUser()) && clickGuardar(inputSelectedNow, name, lastName,user,contrasenia1)"
+                    @click="clickGuardar(inputSelectedNow, name, lastName,user,contrasenia1)"
                 >
                     Guardar
                 </v-btn>
