@@ -294,16 +294,15 @@ export default {
         clickAgregar(){
             this.userOption = "Registrar un Nuevo Usuario";
             this.setterData();
-            this.chargePrivileges();
+            this.chargePrivileges("registerUser");
         },
         async funcEditItem (user) {
             this.userOption = "Actualizar Usuario";
             this.optionUpdateUser = true;
             this.editUserSelected = user.idUser;
-            this.chargePrivileges();
+            this.chargePrivileges("editUser");
             this.moduleItems = await findUserById(user.idUser)
             .then(({data})=>{
-                
                 this.inputSelected = data.idProfile;
                 this.initializer = data;
                 this.initializer.contrasenia2 = data.password;
@@ -336,29 +335,37 @@ export default {
             this.loading = false;
             this.getUsers();
         },
-        async clickUpdateUser(inputSelected, name, lastName,user,contrasenia1){
+        async clickUpdateUser(inputSelected, name, lastName,user,contrasenia1, isvalid){
             this.loading = true;
             this.loadingMessage = "Actualizando usuario...";
-            try{
-                await updateUser({"idProfile": inputSelected,"name": name,
-                        "lastName": lastName,"user": user,"password": contrasenia1, "idUser": this.editUserSelected})
-                .then((data)=>{
-                    this.processComplete(data.messages);
-                    this.setterData();
-                    this.closeDialog();
-                    this.getUsers();
-                    this.optionUpdateUser = false;
-                })
-                .catch(error => {
+            if(isvalid){
+                try{
+                    if (this.inputSelected === inputSelected && this.initializer.name === name &&
+                    this.initializer.lastName === lastName && this.initializer.user === user &&
+                    contrasenia1 === this.initializer.contrasenia1)
+                        throw ["Por favor, recuerde que debe agregar nuevos campos para proseguir con la actualización..."];
+
+                    await updateUser({"idProfile": inputSelected,"name": name,
+                            "lastName": lastName,"user": user,"password": contrasenia1, "idUser": this.editUserSelected})
+                    .then((data)=>{
+                        this.processComplete(data.messages);
+                        this.setterData();
+                        this.closeDialog();
+                        this.getUsers();
+                        this.optionUpdateUser = false;
+                    })
+                    .catch(error => {
+                        this.optionUpdateUser = true;
+                        this.processError(setterErrorData(error));
+                    });
+                }catch(err){
                     this.optionUpdateUser = true;
-                    this.processError(setterErrorData(error));
-                });
-            }catch(err){
-                this.optionUpdateUser = true;
-                this.processError(setterErrorData(err));
+                    this.processError(setterErrorData(err));
+                    //Vigilar como se comporta
+                }
+                this.getUsers();
             }
-            this.loading = false;
-            this.getUsers();
+                this.loading = false;
         },
         async enableUser(){
             this.loading = true;
@@ -399,14 +406,16 @@ export default {
             this.dialogDisableUser = false;
             this.dialogAddUser = false;
         },
-        async chargePrivileges(){
+        async chargePrivileges(typeEvent){
             this.loadingProfile = true;
             this.loading = true;
             this.loadingMessage = "Cargando perfiles a mostrar";
             this.profiles = await chargeProfiles()
             .then(({data})=>{
                 this.inputSelected = data[0].idProfile;
-                this.dialogAddUser = true;
+                (typeEvent === "registerUser") 
+                    ? this.dialogAddUser = true
+                    : this.dialogAddUser = false;
                 return data;
             })
             .catch(error => {

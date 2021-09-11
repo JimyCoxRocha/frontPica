@@ -126,7 +126,7 @@ export const setterErrorData = (msg) => {
     
     try{
         if(msg.response.data.messages === undefined)
-            return ["Bad Request: intente otra vez."];
+            return ["Error en la comunicación con el servicio."];
 
         return  msg.response.data.messages;
     }catch(err){

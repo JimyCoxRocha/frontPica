@@ -101,11 +101,15 @@ import { login } from "../services/DataServices.js";
                 this.$router.push('/home');
             })
             .catch(error => {
-                if(!error.response.data.messages)
-                    console.log("No se ha podido acceder al endpoint");
-                else{
+                if(error.response?.data.messages){
+                  if(error.response.data?.messages)
+                    this.messageErrorDetected = error.response.data.messages[0];
+                  else
+                    this.messageErrorDetected = "No se ha podido acceder al servicio.";
+                    this.errorDetected = true;
+                }else{
+                  this.messageErrorDetected = "No se ha podido acceder al servicio.";
                   this.errorDetected = true;
-                  this.messageErrorDetected = error.response.data.messages[0];
                   }
             });
 
