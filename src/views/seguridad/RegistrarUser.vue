@@ -45,13 +45,41 @@
                 </v-col>
 
                 <FormUser
+                    v-if="dialogEditUser"
+                    :initializer = "initializer"
+                    :profiles = "profiles"
+                    :inputSelected = "inputSelected"
+                    :activeDialog = "dialogEditUser"
+                    :userOption="userOption"
+                    :clickGuardar = "clickUpdateUser"
+                >
+                <template slot="charge">
+                    <ChargeData 
+                        :loading = "loading"
+                    >
+                            <template slot="msgLoading">
+                                    <p v-show="loading">Guardando los datos...</p>
+                            </template>
+                    </ChargeData>
+                    </template>
+                    <template slot="cancel">
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="closeDialog"
+                        >
+                            Cancelar
+                        </v-btn>
+                    </template>
+                </FormUser>
+                <FormUser
                     v-if="dialogAddUser"
                     :initializer = "initializer"
                     :profiles = "profiles"
                     :inputSelected = "inputSelected"
                     :activeDialog = "dialogAddUser"
                     :userOption="userOption"
-                    :clickGuardar = "(optionUpdateUser) ? clickUpdateUser : clickGuardar"
+                    :clickGuardar = "clickGuardar"
                     >
                     <template slot="charge">
                     <ChargeData 
@@ -204,6 +232,7 @@ export default {
         inputSelected: 0,
         editUserSelected: 0,
         dialogAddUser:false,
+        dialogEditUser: false,
         profiles: [],
         moduleItems: [],//C.//Los items que se van a editar (Array),
 		//Esto es lo que se mostrará en el modal
@@ -297,6 +326,7 @@ export default {
             this.chargePrivileges("registerUser");
         },
         async funcEditItem (user) {
+            this.dialogAddUser = false;
             console.log(user);
             this.userOption = "Actualizar Usuario";
             this.optionUpdateUser = true;
@@ -308,7 +338,7 @@ export default {
                 this.initializer = data;
                 this.initializer.contrasenia2 = data.password;
                 this.initializer.contrasenia1 = data.password;
-                this.dialogAddUser = true;
+                this.dialogEditUser = true;
                 return [data];
             })
             .catch(error => {
@@ -414,6 +444,7 @@ export default {
             this.dialogEnableUser = false;
             this.dialogDisableUser = false;
             this.dialogAddUser = false;
+            this.dialogEditUser = false;
             this.getUsers();
         },
         async chargePrivileges(typeEvent){
