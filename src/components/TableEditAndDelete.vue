@@ -9,7 +9,7 @@
     <template v-slot:top>
         <v-text-field
           v-model="search"
-          label="Search (AÚN NO FUNCIONA)"
+          label="Buscar por cualquier campo texto"
           class="mx-4"
         ></v-text-field>
     </template>
@@ -119,12 +119,11 @@
           this.editedIndex = -1
         })
       },
-      filterOnlyCapsText (value, search, item) {
-        console.log(value, search, item);
-        return value != null &&
-          search != null &&
-          typeof value === 'string' &&
-          value.toString().toLocaleUpperCase().indexOf(search) !== -1
+      filterOnlyCapsText (value, search) {
+        return  value != null && 
+                search != null && 
+                typeof value === 'string' && 
+                value.toString().toUpperCase().indexOf(search.toUpperCase()) !== -1
       }
     },
     props: {
