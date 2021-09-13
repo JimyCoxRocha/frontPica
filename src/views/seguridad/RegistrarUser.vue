@@ -292,11 +292,12 @@ export default {
                 this.loading = false;
         },
         clickAgregar(){
-            this.userOption = "Registrar un Nuevo Usuario";
             this.setterData();
+            this.userOption = "Registrar un Nuevo Usuario";
             this.chargePrivileges("registerUser");
         },
         async funcEditItem (user) {
+            console.log(user);
             this.userOption = "Actualizar Usuario";
             this.optionUpdateUser = true;
             this.editUserSelected = user.idUser;
@@ -417,7 +418,7 @@ export default {
         },
         async chargePrivileges(typeEvent){
             this.loadingProfile = true;
-            this.loading = true;
+            this.loading = false;
             this.loadingMessage = "Cargando perfiles a mostrar";
             this.profiles = await chargeProfiles()
             .then(({data})=>{
@@ -431,7 +432,6 @@ export default {
                 this.processError(setterErrorData(error));
                 
             });
-            this.loading = false;
             this.loadingProfile = false;
         },
         setterData(){
