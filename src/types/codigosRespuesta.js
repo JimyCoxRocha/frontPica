@@ -1,6 +1,7 @@
 export const codigosError = {
     200: "OK",
     201: "Created",
+    405: "Not Method Allowed",
     202: "Accepted",
     404: "Not Found",
     401: "Unauthorized",

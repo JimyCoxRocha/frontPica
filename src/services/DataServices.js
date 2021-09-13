@@ -142,7 +142,10 @@ export const peticionPostman = async function(objPostman){
       if (error.response) {
         let timeAfterRequest = performance.now();
         tiempo = (timeAfterRequest - timeBeforeRequest);
-        return generarResponsePostman(error.response.data, error.response.status, tiempo, JSON.stringify(error.response).length);
+        if(error.response.data.numRows === undefined)
+          return generarResponsePostman(error.response.data, error.response.data.status, tiempo, JSON.stringify(error.response).length);
+        else
+          return generarResponsePostman(error.response.data, error.response.status, tiempo, JSON.stringify(error.response).length);
       }
   })
   return objetoResp;
