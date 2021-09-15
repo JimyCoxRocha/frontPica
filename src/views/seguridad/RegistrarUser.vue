@@ -173,6 +173,13 @@
                     </template>
                 </DialogAcceptCancel>
 
+                    <ChargeData 
+                        :loading = "loadingInitialData"
+                    >
+                            <template slot="msgLoading">
+                                    <p v-show="loading">Cargando los datos...</p>
+                            </template>
+                    </ChargeData>
                 <TableEditAndDelete 
                     :disableOptionIn="obtainItemDisabled"
                     typeRegister = "user"
@@ -217,6 +224,7 @@ export default {
         userOption: "",
         loadingMessage: "",
         loading: false,
+        loadingInitialData: false,
         loadingProfile: false,
         dialogEnableUser: false,
         dialogDisableUser: false,
@@ -290,7 +298,7 @@ export default {
             this.activeNotification =  true;
         },
         async getUsers(){
-            this.loading = true;
+            this.loadingInitialData = true;
             this.loadingMessage = "Cargando datos...";
             this.users = await findUsers("all")
             .then(({data})=>{
@@ -301,7 +309,7 @@ export default {
                 return [];
             });
                 this.statusSelected.key = "all";
-                this.loading = false;
+                this.loadingInitialData = false;
         },
         async clickBuscar(){
             this.loading = true;
@@ -362,11 +370,12 @@ export default {
                             "lastName": lastName,"user": user,"password": contrasenia1})
                     .then((data)=>{
                         this.processComplete(data.messages);
+                        this.closeDialog();
                     })
                     .catch(error => {
-                        this.processError(error);
+                        this.processError(setterErrorData(error));
                     });
-                    this.closeDialog();
+                    
                 }catch(err){
                     this.processError((err));
                     

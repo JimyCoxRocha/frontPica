@@ -85,7 +85,7 @@
                     <v-container v-if = "showAlertInfo">
                         <v-alert
                             type="info"
-                        > {{textShowAlert}} </v-alert>
+                        > {{textShowAlertInfo}} </v-alert>
                     </v-container>
                     <v-container>
                         <ChargeData
@@ -186,7 +186,7 @@
                     <v-container v-if = "showAlertInfo">
                         <v-alert
                             type="info"
-                        > Debe ingresar los datos </v-alert>
+                        > Debe ingresar los datos correctamente. Recuerde no colocar tipos numéricos en campos de texto </v-alert>
                     </v-container>
                     <v-container>
                        <v-row
@@ -428,24 +428,25 @@ export default {
         },
         async funcEditItem (idProfile) {
             this.editProfileSelected = idProfile;
-            this.moduleItems = await findProfileOptions(idProfile)
+             await findProfileOptions(idProfile)
             .then((resp)=>{
                 if(resp.data.length > 0){
                     //Setear los valores
                     this.selected = setterProfilesInOptionsActives(resp.data);
-                    return resp.data;
+                    this.moduleItems = resp.data;
+                    this.dialogEdit = true;
                 }else{
-                    return [];
+                    this.moduleItems = [];
+                    this.dialogEdit = true;
                 }
                 
             })
             .catch(error => {
-                
+                this.dialogEdit = false;
                 this.processError(setterErrorData(error));
                 return [];
             });
-
-            this.dialogEdit = true;
+            
         },
         async disableProfile(){
             await disableProfile(this.editProfileSelected)
@@ -484,9 +485,9 @@ export default {
                         this.processComplete(resp.messages)
                     })
                     .catch(error => {
+                        this.textShowAlertInfo = "Ha ocurrido un error al guardar el perfil. Intente otra vez.: "+setterErrorData(error);
                         this.showAlertInfo = true;
                         this.selected = setterProfilesInOptionsActives(this.moduleItems);
-                        this.textShowAlertInfo = "Ha ocurrido un error al actualizar el perfil. Intente otra vez.: "+error;
                         this.loadingSaveData = false;
                     });
             } catch (error) {
@@ -494,24 +495,27 @@ export default {
                 this.textShowAlertInfo = "Ha ocurrido un error al actualizar el perfil. Intente otra vez.";
                 this.selected = setterProfilesInOptionsActives(this.moduleItems);
             }
-            console.log(this.moduleItems);
         },
         async addProfile () {
             try {
-                if((this.nameProfile.trim() === '') || (this.descriptionProfile.trim() === ''))
-                    throw "Debe ingresar los datos";
+                if((this.nameProfile.trim() === '') || (this.descriptionProfile.trim() === '') 
+                || (this.descriptionProfile.trim().match(/\d+/g)?.length !== undefined) 
+                || (this.nameProfile.trim().match(/\d+/g)?.length !== undefined) )
+                    throw "Debe ingresar los datos correctamente. Recuerde no ingresar datos numéricos.";
 
                 await saveProfile(this.nameProfile, this.descriptionProfile)
                 .then((resp)=>{
                     this.processComplete(resp.messages)
+                    this.closeDialog();
                     this.getProfiles();
                 })
                 .catch(error => {
                     this.processError(setterErrorData(error));
+                    this.dialogAddProfile = true;
                 });
-                this.closeDialog();
             } catch (error) {
-                this.showAlertInfo = true;
+                this.showAlertInfo = error;
+                this.dialogAddProfile = true;
             }
         },
         closeDialog(){

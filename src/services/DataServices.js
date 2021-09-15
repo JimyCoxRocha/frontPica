@@ -3,7 +3,7 @@ import { saveLocalStorage } from '../helpers/handleLocalStorage.js';
 import { generarResponsePostman } from '../helpers/generarResponsePostman.js';
 import { jsonToUrlEncode } from '../helpers/setterData';
 
-const urlMdw = 'http://localhost:8081/api-visor/v1';
+const urlMdw = 'http://localhost:8080/visor/v1';
 
 export const login = async function(payload) {
   return await axios.post(`${urlMdw}/securitys/login`, payload)

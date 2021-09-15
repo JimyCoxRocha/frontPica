@@ -72,9 +72,14 @@
 
 <script>
 import { login } from "../services/DataServices.js";
+
     export default {
       name:"LoginPage",
-
+    created: function (){
+      if(localStorage.getItem("token") != null){
+        this.$router.push('/home');
+      }
+    },
       data: () => ({
           user: '',
           password: '',
