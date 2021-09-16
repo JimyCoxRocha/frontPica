@@ -46,8 +46,9 @@
     import PanelOption from "../components/PanelOption.vue";
 
     export default {
-        name:"Home",
+        name:"LoggedInLayout",
         created(){
+            this.$router.push('/home');
             this.menuData = JSON.parse(findLocalStorage( 'menu' ));
         },
         data(){

@@ -8,7 +8,10 @@
 
 
 export default {
-
+    name: "Home",
+    created(){
+        console.log("Creado");
+    },
 }
 </script>
 
