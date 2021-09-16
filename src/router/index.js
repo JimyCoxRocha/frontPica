@@ -20,7 +20,7 @@ const routes = [
     component: Login
   },
   {
-    path: '/index.html',
+    path: '/',
     name: 'LoggedInLayout',
     component: LoggedInLayout,
     props: true,
