@@ -77,7 +77,7 @@ import { login } from "../services/DataServices.js";
       name:"LoginPage",
     created: function (){
       if(localStorage.getItem("token") != null){
-        this.$router.push('/home');
+        this.$router.push('/');
       }
     },
       data: () => ({

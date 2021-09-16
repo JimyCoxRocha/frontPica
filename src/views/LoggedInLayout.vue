@@ -48,8 +48,12 @@
     export default {
         name:"LoggedInLayout",
         created(){
-            this.$router.push('/home');
-            this.menuData = JSON.parse(findLocalStorage( 'menu' ));
+            if(localStorage.getItem("token") === null){
+                this.$router.push('/login');
+            }else{
+                this.$router.push('/home');
+                this.menuData = JSON.parse(findLocalStorage( 'menu' ));
+            }
         },
         data(){
             return{
