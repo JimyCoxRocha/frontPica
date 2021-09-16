@@ -1,5 +1,6 @@
 <template>
   <v-app id="app" >
+    <router-link to="/home"></router-link>
     <router-view/>
   </v-app>
 </template>
