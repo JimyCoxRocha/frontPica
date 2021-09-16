@@ -1,6 +1,5 @@
 <template>
   <v-app id="app" >
-    <router-link to="/home">Hola a todos</router-link>
     <router-view/>
   </v-app>
 </template>
